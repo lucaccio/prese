@@ -1,0 +1,117 @@
+<?php
+
+
+$date = $this->date;
+$mesi = array(
+    1 => 'Gennaio',
+    2 => 'Febbraio',
+    3 => 'Marzo',
+    4 => 'Aprile',
+    5 => 'Maggio',
+    6 => 'Giugno',
+    7 => 'Luglio',
+    8 => 'Agosto',
+    9 => 'Settembre',
+    10 => 'Ottobre',
+    11 => 'Novembre',
+    12 => 'Dicembre'
+);
+?>
+<script>
+    var url = "<?php echo $this->baseUrl('index.php') ?>";
+    $(function(){
+        $('.cliccabile').on('click', function(e){
+            var that = this;
+            var div = $(this).find('div');
+            var id  = $(div).attr('id');
+           // console.log( id   );
+            $.ajax({
+                url:  url + '/giri/add',
+                data: {
+                    timestamp:id
+                },
+                type: 'POST',
+                dataType: 'json',
+                async: true,
+                success: function(result) {
+                    if(result == 'add') {
+                        $(that).css('background-color', 'red');
+                    }
+                    if(result == 'del') {
+                        $(that).css('background-color', 'white');
+                    }
+
+                },
+                error: function(o,e,t){
+                    if(o.status == 401) {
+
+                        return;
+                    } else {
+                       callback(e);
+                    }
+                }
+            });
+        })
+    });
+
+</script>
+
+
+<div>
+<h3>Impostazione giri</h3>
+    <form action="" method="post">
+    <div>
+        <select name="mese">
+            <option value="<?php echo $date->get(Zend_Date::MONTH_SHORT); ?>"><?php echo ucfirst($date->get(Zend_Date::MONTH_NAME)); ?></option>
+            <?php  foreach($mesi as $k => $mese) { ?>
+                <option value="<?php echo $k; ?>"><?php echo $mese; ?></option>
+            <?php } ?>
+        </select>
+        <?php
+            $anno_corrente = date('Y');
+            $anni_options  = isset($_POST['anno']) ?  $_POST['anno'] : null;
+            for($i = 2013; $i<= $anno_corrente + 1; $i++) {
+                $selected = null;
+                if($i == $anni_options) {
+                    $selected = 'selected';
+                } elseif($i == $anno_corrente) {
+                    $selected = 'selected';
+                }
+                $anni_options.= "<option $selected value='$i'>$i</option>";
+            }
+        ?>
+        <select name="anno"> <?php echo $anni_options ?> </select>
+        <input type="submit" value="Carica">
+    </div>
+  
+    <div>
+       <p>cliccare dentro i quadrati</p>
+    </form>
+            <?php
+
+                echo "<table border='1'><tr>";
+                $bordo = "<tr>";
+                for($i = $date->get(Zend_Date::DAY); $i <= $date->get(Zend_Date::MONTH_DAYS);  $i++ ) {
+                    $tdbgcolor = 'white';
+                    $tdclass = 'cliccabile';
+                    if(array_key_exists($date->toString('YYYY-MM-dd'), $this->date_presenti)) {
+                        $tdbgcolor = 'red';
+                    }
+                    $color = 'black';
+                    if('dom' == $date->get(Zend_Date::WEEKDAY_NAME) ) {
+                        $color = 'red';
+                        $tdclass='noncliccabile';
+                    }
+                    echo "<td><div>" . $i . "</div><div style='color: $color'>" .  $date->get(Zend_Date::WEEKDAY_NAME) . "</div></td>";
+                    $id = $date->get(Zend_Date::TIMESTAMP);
+                    $bordo .= "<td class='$tdclass' style='background-color: $tdbgcolor'><div style='margin: 15px; margin-bottom: 20px;' id='" .$id . "'></div></td>";
+                    $date->add(1, Zend_Date::DAY);
+                }
+                echo "</tr>";
+                $bordo .= "</tr>";
+                echo $bordo;
+                echo "</table>";
+            ?>
+
+    </div>
+</div>

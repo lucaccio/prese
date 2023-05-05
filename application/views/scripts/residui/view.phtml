@@ -1,0 +1,73 @@
+<style type="text/css">
+    .thead {
+        background-color: #E0E0E0;
+    }
+</style>
+
+<script>
+    var url = "<?php echo $this->baseUrl('index.php') ?>";
+    var uid = "<?php echo $this->utente->getId() ?>";
+ 
+    $( function() {
+    
+        $("#annualita").change( function() {
+            year = $(this).attr('value');
+            window.location.href= url + '/residui/view/user_id/' + uid + '/year/' + year;
+        });
+    });
+</script>            
+
+<h2>Residui</h2> 
+<p>Utente:  <?php echo $this->utente->getAnagrafe() ?></p>
+
+<div>
+    <label>Anno: </label>
+    <select name="annualita" id="annualita">
+        <?php
+        $now = date('Y');
+        if(isset($this->year)) { ?>
+             <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option>
+        <?php }  
+        for($i = 2007; $i <= $now; $i++) { 
+            if(isset($this->year)) {
+                if($i == $this->year ) 
+                    continue;
+            }
+         ?>
+         <option value="<?php echo $i ?>"><?php echo $i ?></option>
+        <?php } ?>
+    </select>
+    <br><br>
+ 
+    <table  cellspacing="0px" border="0" cellpadding="5px" id="">
+        <thead align="left" class="thead">
+            <th>Anno</th>
+            <th>Tipo</th>
+            <th>Precedente</th>
+            <th>Maturato</th>
+            <th>Goduto</th>
+            <th>Rimanenza Totale</th>
+        </thead>
+        <tbody >
+        <?php 
+        $i = 1;
+        if($this->residui) { 
+            foreach($this->residui as $k => $residuo) { ?>
+            <tr>
+                <td><?php echo $residuo->year ?></td>
+                <td><?php echo $residuo->tipo ?></td>
+                <td><input readonly type="text" name="riga[<?php echo $i ?>][precedente]" value="<?php echo $residuo->precedente ?>" /></td>
+                <td><input readonly type="text" name="riga[<?php echo $i?>][maturato]" value="<?php echo $residuo->maturato ?>" /></td>
+                <td><input readonly type="text" name="riga[<?php echo $i ?>][goduto]" value="<?php echo $residuo->goduto ?>" /></td>
+                <td><input readonly type="text" name="riga[<?php echo $i?>][totale]" value="<?php echo $residuo->totale ?>" /></td>
+                <td><input readonly type="hidden" name="riga[<?php echo $i ?>][id]" value="<?php echo $residuo->id ?>"</td>
+                <td></td>
+            </tr>
+            <?php $i ++; } }?>
+        </tbody>
+    </table>
+    </p>
+ 
+</div>
+
+ 

@@ -1,0 +1,132 @@
+<?php
+ 
+$dayOfWeek = array(
+    '0' => 'D',
+    '1' => 'L',
+    '2' => 'M',
+    '3' => 'M',
+    '4' => 'G',
+    '5' => 'V',
+    '6' => 'S'
+);
+
+ $mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+ );
+ 
+    $year = $this->year;
+    $prev = $this->month - 1 ;
+    $next = $this->month + 1 ;     
+ 
+    if($prev == 0 ) { 
+             $prevMese = 12;
+             $prevAnno = $year - 1;
+         } else {
+             $prevMese = $prev;
+             $prevAnno = $this->year;
+    }
+         
+    if($next == 13) {
+             $nextMese = 1;
+             $nextAnno = $year +1;
+         } else {
+             $nextMese = $next;
+             $nextAnno = $this->year;
+    }
+ 
+
+
+$anno      = $this->year;
+$mese      = $this->month;
+$pasquetta = Application_Model_Pasqua::pasquetta($anno);
+$sabato    = false;
+$domenica  = false; 
+?>
+ <table border="1" align="left">  
+     <tbody>
+         <tr>
+             <td align="center"> <?php echo $mesi[$mese] . ' ' . $year  ?> </td>  
+        <?php
+        if($mese < 10) {
+               $mese = '0'.$mese; 
+        }
+        //procedura per il colore dei giorni del mese
+        for($i = 1; $i<=cal_days_in_month(CAL_GREGORIAN, $mese, $anno); $i++)  {
+            //per stampare il giorno della settimana devo determinarne il numero
+            $dOfW = date('w', mktime(0,0,0,$mese, $i, $anno));
+            if($i< 10) { $i = '0'.$i; }
+            $domenica  = Application_Service_Tools::isSunday(date($anno.'-'.$mese.'-'.$i));
+            $adesso    = new DateTime($anno .'-'.$mese.'-'.$i);
+            $adesso    = $adesso->getTimestamp();
+            $festivita = Application_Service_Tools::isHoliday(date($anno.'-'.$mese.'-'.$i));
+            
+            
+            if(!$domenica && ($adesso != $pasquetta) && !$festivita ){
+                echo "<td align='center' >$i</td>";
+            } else {
+                echo "<td align='center' bgcolor='#FF0000' >$i</td>";
+            }
+        }  //fine procedura giorni
+        echo "</tr>";
+        
+        $uid = 0;
+        foreach($this->users as $user){
+            $uid++;
+            $user_id = $user->getId();
+            echo "<tr>";
+            echo "<td><b>{$user->getAnagrafe()}</b></td>";
+            
+            for($i = 1; $i<=cal_days_in_month(CAL_GREGORIAN, $mese, $anno); $i++)  {
+                if($i< 10) { $i = '0'.$i; }
+                              
+               $D = $anno .'-'.$mese.'-'.$i;
+               $sabato    = false;
+               $domenica  = false;
+               $sabato    = Application_Service_Tools::isSaturday($D);
+               $domenica  = Application_Service_Tools::isSunday($D);
+               $pasquetta = Application_Service_Tools::isEasterMonday($D);
+                //STAMPO L'ASSENZA
+                    $e = array();
+                    $e = $user->getEvents();
+                    
+                    if(!$user->isAssunto($D)) {
+                        echo "<td></td>";
+                    } else {
+                        if( @array_key_exists($D, $e[$user->getId()]) ) {
+                            $x = $e[$user->getId()];
+                            echo "<td>" . $this->siglatipo($x[$D]) ."</td>";
+                        } else {
+                            if($D <= date('Y-m-d')) {
+                                if($sabato) {
+                                    echo "<td>" . number_format($user->getContratto()->getRidotto(),2) . "</td>";
+                                } elseif($domenica) {
+                                        echo "<td></td>";
+                                } elseif($pasquetta) {
+                                        echo "<td></td>";
+                                } elseif(Application_Service_Tools::isHoliday($D, $user->getSede()->getSedeId())) {
+                                        echo "<td></td>";
+                                } else {
+                                           echo "<td>" . number_format($user->getContratto()->getPieno(),2) . "</td>";
+                                }
+                            } else {
+                                    echo "<td></td>";
+                            }
+                        }
+                    }
+            }
+            echo "</tr>";
+        }   
+        echo "</tbody>";
+        echo "</table>";
+ 

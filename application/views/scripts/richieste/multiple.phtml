@@ -1,0 +1,216 @@
+<!-- 
+    inserimento multiplo dei dipendenti
+    20 aprile 2020 
+
+-->
+<script type="text/javascript">
+ var url = "<?php echo $this->baseUrl('index.php') ?>";
+  $(function() {
+
+    function noSundays(date) {
+             return [date.getDay() != 0, ''];
+         }
+         $(".tdQta").hide();
+         $("#quantita").prop('readonly', true);
+
+
+         $("#dateStart").datepicker({
+             beforeShowDay: noSundays,
+             defaultDate: "+1w",
+             changeMonth: true,
+             numberOfMonths: 2,
+             dateFormat: "dd-mm-yy",
+             onClose: function(selectedDate) {
+                 $("#dateStop").datepicker("option", "minDate", selectedDate);
+             }
+         });
+
+         $("#dateStop").datepicker({
+             beforeShowDay: noSundays,
+             defaultDate: "+1w",
+             changeMonth: true,
+             numberOfMonths: 2,
+             dateFormat: "dd-mm-yy",
+             onClose: function(selectedDate) {
+                 $("#dateStart").datepicker("option", "maxDate", selectedDate);
+             }
+         });
+
+
+
+         $("input[type=submit]").button();
+
+
+         $("#month_select").change(function() {
+             m = $(this).attr('value');
+             window.location.href = url + '/richieste/add/month_select/' + m;
+
+         });
+
+         $("#tipo").change( function() {
+             $(".tdQta").hide();
+             $("#quantita").prop('readonly', true);
+             // disattivo le domenica nel calendario
+             $("#dateStart").datepicker('option', 'beforeShowDay', noSundays);
+             $("#dateStop").datepicker('option', 'beforeShowDay', noSundays);
+             var id = m = $(this).attr('value');
+             if (id == 7 || id == 6) {
+                 $(".tdQta").show();
+                 $("#quantita").prop('readonly', false);
+             }
+
+            //mostro le domeniche nel calendario per gli id di tipologia assenze
+             if (id == 1 || id == 3 || id == 18) {                 
+                 $("#dateStart").datepicker('option', 'beforeShowDay', false);
+                 $("#dateStop").datepicker('option', 'beforeShowDay', false);
+             }
+
+
+         });
+
+
+    $("#btnLeft").click(function () {
+        var selectedItem = $("#rightValues option:selected");
+        $("#leftValues").append(selectedItem);
+    });
+
+    $("#btnRight").click(function () {
+        var selectedItem = $("#leftValues option:selected");
+        $("#rightValues").append(selectedItem);
+    });
+
+    $("#rightValues").change(function () {
+        var selectedItem = $("#rightValues option:selected");
+       // $("#txtRight").val(selectedItem.text());
+    });
+
+    $("#leftValues").change(function () {
+       // var selectedItem = $("#leftValues option:selected");
+      // console.log(selectedItem)
+    });
+  });
+</script>
+
+<style>
+container {
+    background-color: #ff4433;
+    overflow: auto;
+}
+SELECT, INPUT[type="text"] {
+    width: 160px;
+    box-sizing: border-box;
+}
+SECTION {
+
+    float: left;
+    width: 460px;
+    padding: 8px;
+    /**   background-color: #f0f0f0; */
+    overflow: auto;
+    padding-bottom: 4px;
+}
+SECTION > DIV {
+    float: left;
+    padding: 4px;
+}
+SECTION > DIV + DIV {
+    width: 40px;
+    text-align: center;
+}
+
+h4 {
+    padding: 0px;
+    margin: 2px;
+}
+
+
+MYSECTION > DIV {
+    padding: 2px;
+}
+
+</style>
+
+
+<h3>Inserimento mulitplo</h3>
+<p>Per la selezione di più utenti alla volta scegliere una delle due opzioni:</p>
+<p>1) Usare il tasto CTRL + il tasto sinistro del mouse e selezionare uno alla volta;</p>
+<p>2) Usare il tasto SHIFT + i tasti freccia (su - giù) ;</p>
+
+<container id="container">
+<form action="" method="post">
+<section  >
+ 
+    <h4>Elenco dipendenti</h4>
+    <!-- utenti da selezionare -->
+    <div>
+        <select id="leftValues"   size="10"  multiple>
+        <?php foreach ($this->users as $k => $user) { ?>
+         <option value="<?php echo $user->getId() ?>"><?php echo $user->getAnagrafe(false) ?></option>
+        <?php } ?>
+        </select>
+    </div>
+    <!-- pulsanti -->
+    <div>
+        <input type="button" id="btnLeft" value="&lt;&lt;" />
+        <input type="button" id="btnRight" value="&gt;&gt;" />
+    </div>
+    <!-- utenti selezionati -->
+    <div>
+        <select id="rightValues" name="users[]"  size="10" multiple required></select>
+    </div>
+
+
+    </section>
+
+
+<mysection>
+    <div>
+    <h4>Lista Assenze</h4>
+        <select id="tipo" name="tipologia_id" style="width: 200px;" required>
+            <option value="">Seleziona assenza</option>
+            <?php
+                foreach ($this->tipologie as $tipo) {
+                    $hidden = '';
+                    if ($tipo->isHidden() == true) {
+                        $hidden = ' [admin]';
+                    }
+            ?>
+            <option value="<?php echo $tipo->getId() ?>"><?php echo '[' . $tipo->getSigla() . '] ' . $tipo->getDescrizioneAdmin() .  $hidden ?></option>
+            <?php } ?>
+        </select>
+    </div>
+    <br>
+    <div class="tdQta">
+        <span> <b>Quantità in ore</b> </span>
+        <input id="quantita" name="quantita" type="number" min="0.5" max="8" step="0.5" value="0" />
+    </div> 
+    <div>
+        <h4>Data inizio assenza</h4>
+        <input type="text" name="start" id="dateStart" autocomplete="off" required>
+    </div>    
+    <div> 
+    <h4>Data fine assenza </h4>
+    <input type="text" name="stop" id="dateStop" autocomplete="off" required/>
+    </div> 
+
+
+
+
+
+
+
+ 
+    <div>
+       
+        <input type="checkbox" id="delete" name="deleteOld" value="true" checked>
+        <label for="delete"> Cancellare eventuali assenze presenti nel periodo selezionato</label><br>
+    </div>
+ 
+<div><input type="submit" value="Salva" name="submit" /></div>
+
+</mysection>
+
+
+</form>
+
+</container>

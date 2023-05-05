@@ -1,0 +1,314 @@
+<?php
+
+
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+$mesi = array(
+    "0" => "Intero Anno",
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+
+?>
+<style type="text/css">
+    .error-mail{
+        color:red;
+        list-style-type: none;
+        font-weight:bold;
+    }
+    .success{
+        list-style-type: none;
+        font-weight:bold;
+        color:green;
+        background-color:#8ae234;
+        border-color:forestgreen;
+        border-style: solid;
+        border-width: 1px;
+        width: 300px;
+    }
+    .pari{
+        
+    }
+    .dispari{
+        background-color:whitesmoke;
+    }
+</style>
+<script>
+    var sid, note ;
+    var url = "<?php echo $this->baseUrl('index.php') ?>" ;
+    
+    function invianota(sid,note) { 
+        $.ajax({
+           type: "POST",
+           url:  url + "/sostituzioni/invia-nota",
+           dataType: "json",
+           data: {
+               sostituzione_id: sid,
+               note: note
+           },
+           beforeSend: function() {
+               $("#note").dialog('close');
+               $("#incorso").dialog('open');
+           },
+           success: function(response){
+               $("#incorso").dialog('close');
+               //console.log('email inviata');
+               alert(response);
+           },
+           error: function(xhr, text, thrownError) {
+       
+                $("#incorso").dialog('close');
+                console.log(xhr);
+                console.log(xhr.responseText);
+                console.log(text);
+                
+                // if(xhr.status != 500) {
+                    
+                   // alert(xhr.responseText);
+                //  }
+                $("#note").dialog('open');
+                alert("Errore invio email: " + xhr.responseText);
+                
+                 
+           }        
+        });
+    }
+    
+   
+    
+    
+    
+  $(function(){  
+    
+  
+    $("#sostituzioni").chromatable({
+        width: "100%", 
+        height: "auto" ,
+        scrolling: "yes"
+    });
+    
+     $("SELECT").selectBox(); 
+         $( "input[type=submit]" )
+            .button()
+            .click(function( event ) {}); 
+
+    $('.promemoria').click(function(e){
+             id = $(this).attr('href');
+             alert("in costruzione" + id);
+          //  $("#richiesta_id").attr('value', id);
+          //  $("#rifiuta").dialog('open');
+            e.preventDefault();
+    });
+
+    $('.note').click(function(e){
+        sid = $(this).attr('href');
+        d   = $("#note");
+        $('#text-note').val('') ; 
+        d.dialog('open');
+        e.preventDefault();
+    });
+  
+    
+        
+    $( "#note" ).dialog({
+      autoOpen: false,  
+      resizable: false,
+      height:"300",
+      width:"500",
+      modal: true,
+      buttons: {
+        "Invia": function() {
+          // $("#confirm").dialog('open');
+           text_ = $('#text-note').val() ;
+           //console.log(text_ + ' ' + sid);
+           if(text_ == '') {
+               alert('Inserire il testo');
+           } else {
+               invianota(sid, text_);
+           }
+        },
+        "Annulla": function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });
+    
+    
+    $( "#confirm" ).dialog({
+      autoOpen: false,  
+      resizable: false,
+      height:200,
+      modal: true,
+      buttons: {
+        "Ok": function() {
+          $( this ).dialog( "close" );
+        },
+        "Cancella": function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });
+    
+    //finestra invio in corso...
+    $( "#incorso" ).dialog({
+      autoOpen: false,  
+      resizable: false,
+      height:150,
+      modal: true 
+    });
+    
+    
+  });
+</script>
+
+<div id="incorso" title="Invio messaggio in corso">
+  <p> Attendere...</p>
+</div>
+
+ 
+
+<div id="note" title="Inserire note per il sostituto">
+  <p>
+      <textarea id="text-note" style="height:140px; width:460px; margin:0; padding:0; border-style: solid; border-color: black; border-width:1px;"></textarea>
+  </p>
+</div>
+
+
+<div id="confirm" title="Invio email">
+  <p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>Inviare email al sostituto?</p>
+</div>
+
+<h3>Elenco Sostituzioni</h3>
+ 
+<form action="" method="post" >
+    
+   
+    <select name="user">
+        
+        <?php
+        if(isset($this->utente)) { ?>
+        <option value="<?php echo $this->utente->getId()?>"><?php echo $this->utente->getAnagrafe()?></option>
+        <?php }?> 
+        <option value="">Tutti gli utenti</option>
+        <?php foreach($this->users as $k => $user) { ?>
+            <option value="<?php echo $user->getId()?>"><?php echo $user->getAnagrafe()?></option>
+        <?php } ?>
+        
+    </select>
+    
+    <!--
+    <select name="stato">
+        <option value="1">Da fare</option>
+         <option value="2">In corso</option>
+          <option value="3">Eseguite</option>
+            <option value="4">Tutte</option>
+    </select>
+    
+    -->
+    <select name="month">
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php for($i = 0; $i <= 12   ; $i++) { 
+            if($i == $this->month) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $mesi[$i] ?></option>
+        <?php } ?>
+    </select> 
+    
+    <select name="year">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option> 
+        <?php for($i = 2012; $i<=date('Y') + 1 ; $i++) { 
+            if($i == $this->year) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $i ?></option>
+        <?php } ?>
+    </select>
+      
+    <input type="submit" name="submit" value="Cerca" />
+     
+</form>
+
+<p></p>
+
+
+
+<table  id="sostituzioni">
+    <thead  >
+        <th>Sos. N°</th>
+        <th>Ric. N°</th>
+        <th>As. N°</th>
+        <th>Operatore</th>
+        <th>Sostituto</th>
+        <th>Sede</th>
+        <th>Tipo</th>
+        <th>Giorni</th>
+        <th>Dal</th>
+        <th>Al</th>
+        <th>Azioni</th>
+    </thead>
+    <tbody>
+<?php 
+
+if($this->list) { 
+    
+    //usort($this->list, array('Application_Model_Sostituzione','orderByDate'));
+    $i = 0;
+    foreach($this->list as $k => $sostituzione) { 
+        
+        ($i % 2 == 0) ? $clss = 'pari' : $clss = 'dispari';
+        $i++;
+        
+        if($sostituzione->giorni_effettivi > 0) {
+            $giorni_di_sostituzione = $sostituzione->giorni_effettivi . ' su ' . $sostituzione->getAssenza()->getGiorni();
+        } else {
+            $giorni_di_sostituzione = $sostituzione->getAssenza()->getGiorni();
+        }
+        
+        
+        $sede = ucfirst($sostituzione->getUser()->getSede()->getCitta());
+        if($sede == '') {
+            $sede = 'NESSUNA SEDE';
+        }
+        
+        $sostituto = trim($sostituzione->getSostituto()->getAnagrafe());
+         
+        if($sostituto == '') {
+            $sostituto = 'NESSUN SOSTITUTO';
+        }
+        ?>
+         
+       <tr class="<?php echo $clss ?>">
+           <td><?php echo $sostituzione->getId()?></td>
+           <td><?php echo $sostituzione->getAssenza()->getRichiestaId() ?></td> 
+           <td><?php echo $sostituzione->getAssenza()->getAssenzaId() ?></td>
+           <td><?php echo $sostituzione->getUser()->getAnagrafe() ?></td>
+           <td><?php echo $sostituto ?></td>
+           <td><?php echo $sede ?></td>
+           <td><?php echo $this->Tipologia( $sostituzione->getAssenza()->getTipologiaId())  ?></td>  
+           <td><?php echo $giorni_di_sostituzione; ?></td>
+           <td><?php echo $this->formatDate($sostituzione->getAssenza()->getDateStart(), 'd/m/Y') ?></td>
+           <td><?php echo $this->formatDate($sostituzione->getAssenza()->getDateStop(), 'd/m/Y') ?></td>
+           <td>
+               <a class="note"   href="<?php echo $sostituzione->getId()?>">Note</a> | 
+               <a href="<?php echo $this->baseUrl('index.php')?>/budget/index/sostituzione_id/<?php echo $sostituzione->getId()?>">Budget</a> |
+               <a href="<?php echo $this->baseUrl('index.php')?>/sostituzioni/edit/sostituzione_id/<?php echo $sostituzione->getId()?>">Modifica Singola</a> |
+               <a href="<?php echo $this->baseUrl('index.php')?>/sostituzioni/multipla/sostituzione_id/<?php echo $sostituzione->getId()?>">Modifica Multipla</a> |
+               <a class="promemoria" href="<?php echo $sostituzione->getId()?>">Promemoria email</a>
+           </td>
+       </tr>
+       
+<?php } }?>
+    </tbody> 
+</table>
+
+<div align="center">
+<?php echo $this->flashMessages(); ?>
+</div>

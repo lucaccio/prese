@@ -1,0 +1,40 @@
+ <script>
+    $(function() {
+		
+           $( "#data" ).datepicker({dateFormat: "dd-mm-yy"} );
+          
+	});
+</script>
+
+<h2>Modifica Primanota spese N. <?php echo $this->primanota_id?> (Sostituzione N. <?php echo $this->sostituzione_id?>)</h2>
+
+ 
+
+
+<form action="" method="POST">
+    
+    
+    <label>Descrizione breve: </label><br><input type="text" name="descrizione" value="<?php echo $this->primanota->getDescrizione(); ?> 
+" size="50px"/><br>
+    <label>Data: </label><br><input type="text" name="data" id="data" value="<?php echo $this->primanota->getData('it'); ?> 
+" /><br>
+    <!--<label>Importo totale: </label><br><input type="text" name="importo" value="<?php echo $this->primanota->getImporto(); ?> 
+" /><br>-->
+    
+    <label>Cassa: </label><br><input type="text" name="cassa" value="<?php echo $this->primanota->getCassa(); ?> 
+" /><br>
+    
+    <label>Banca: </label><br><input type="text" name="banca" value="<?php echo $this->primanota->getBanca(); ?> 
+" /><br>
+    
+    <label>Note</label><br>
+    <textarea rows="5" cols="40" name="note" ><?php echo $this->primanota->getNote(); ?> </textarea>
+    
+    <input type="hidden" name="sostituzione_id" value="<?php echo $this->sostituzione_id?>" /><br>
+    <input type="hidden" name="primanota_id" value="<?php echo $this->primanota_id?>" /><br>
+    <input type="hidden" name="token" value="<?php echo $this->token ?>" /><br>
+    
+    <input type="submit" name="submit" value="Salva" />
+    
+</form>
+ 

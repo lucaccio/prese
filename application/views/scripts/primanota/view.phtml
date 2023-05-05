@@ -1,0 +1,73 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+
+<script>
+  $(function(){  
+        $("#primanota").chromatable({
+                width: "100%", 
+		height: "auto" ,
+                scrolling: "yes"
+	});	
+        
+       $("SELECT").selectBox(); 
+         $( "input[type=submit]" )
+            .button()
+            .click(function( event ) {}); 
+        
+        
+        
+        
+  });
+</script>
+
+<h3>Elenco Primanota</h3>
+
+<p>Importo concesso  <b>&euro; <?php echo $this->importo ?></b></p>
+
+<p>Importo disponibile <b>&euro; <?php echo $this->disponibile ?></b></p>
+
+<table id="primanota">
+    <thead align="left">
+    <th>Primanota n. </th>
+    <th>Sostituzione n. </th>
+    <th>Descrizione </th>
+    <th>Del  </th>
+    <!--<th>Importo </th>-->
+    <th>Uscita Cassa </th>
+    <th>Uscita Banca</th>
+    <th>Note</th>
+    <th>Azioni</th>
+    </thead>
+    <tbody>
+        
+        <?php if(count($this->elenco) > 0) { ?>
+            <?php foreach( $this->elenco as $row ) { ?>
+            <tr>
+                <td><?php echo $row->primanota_id ?></td>
+                <td><?php echo $row->sostituzione_id ?></td>
+                <td><?php echo $this->escape($row->descrizione) ?></td>
+                <td><?php echo $this->formatDate($row->data) ?></td>
+                <!--<td><?php echo $row->importo ?></td>-->
+                <td><?php echo $row->cassa ?></td>
+                <td><?php echo $row->banca ?></td>
+                <td><?php echo $this->escape($row->note) ?></td>
+                
+                
+                <td>
+                    <a href="<?php echo $this->baseUrl('index.php')?>/primanota/edit/sostituzione_id/<?php echo $row->sostituzione_id ?>/primanota_id/<?php echo $row->primanota_id ?>">Modifica</a>
+                    <a href="<?php echo $this->baseUrl('index.php')?>/primanota/delete/sostituzione_id/<?php echo $row->sostituzione_id ?>/primanota_id/<?php echo $row->primanota_id ?>">Elimina</a>
+                </td>
+                
+            </tr>
+        
+            
+            <?php } ?>
+        <?php } ?>
+        
+        
+    </tbody>
+
+</table>
+

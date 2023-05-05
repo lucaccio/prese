@@ -1,0 +1,99 @@
+<style>
+    .iText {
+        border: 1px solid #323232; /* Bordo */
+        color: #1C1C1C; /* Colore del testo */
+        height: 30px; /* Altezza */
+        line-height: 30px; /* Altezza di riga */
+        width: 40px; /* Larghezza */
+        padding: 0 10px; /* Padding */
+    } 
+    
+    .iDesc {
+        border: 1px solid #323232; /* Bordo */
+        color: #1C1C1C; /* Colore del testo */
+        height: 30px; /* Altezza */
+        line-height: 30px; /* Altezza di riga */
+        width: 190px; /* Larghezza */
+        padding: 0 10px; /* Padding */
+    }
+</style>
+<script type="text/javascript">
+    $(function(){
+        $("#submit").click(function(e){
+            var desc = $("#descrizione_contratto").val() ;
+            desc = $.trim(desc);
+            if(desc == '') { 
+                e.preventDefault();
+                var dialog = Dialog.init();
+                dialog.open('Attenzione, inserire una descrizione per il contratto.');
+            } ;
+        });
+    });
+</script>
+<h2>Modifica contratto</h2>
+<p>[ Permette di modificare i dettagli di un contratto esistente ]</p>
+<hr size="1" />    
+<div id="view-content">
+
+    <br/> <br/>
+    <form action="" method="POST">
+    
+    <table>
+        
+        <tr>
+            <td><b>Descrizione</b></td><td colspan="2"><input id="descrizione_contratto" class="iDesc" type="text" name="descrizione" value="<?php echo $this->contratto->getDescrizione() ?>"</td>
+        </tr>
+        <tr>        
+            <td><b>Contratto bisettimanale</b></td>
+            <td><div><input type="checkbox" id="bisettimanale" name="bisettimanale" <?php echo $this->contratto->isBisettimanale() ? "checked" : null?> > </div>  </td>        
+        </tr>
+        <tr>
+            <td></td><td><strong>Mattina</strong></td><td><strong>Pomeriggio</strong></td>
+        </tr>
+        
+        <tr>
+            <td><b>Lunedì</b></td>
+            <td><input class="iText" type="text" name="mon[mattina]" value="<?php echo $this->contratto->getDetailsMattina()->mon ?>" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="mon[sera]" value="<?php echo $this->contratto->getDetailsSera()->mon ?>" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Martedì</b></td>
+                <td><input class="iText" type="text" name="tue[mattina]" value="<?php echo $this->contratto->getDetailsMattina()->tue ?>"  size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="tue[sera]" value="<?php echo $this->contratto->getDetailsSera()->tue ?>"size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Mercoledì</b></td>
+                <td><input class="iText" type="text" name="wed[mattina]" value="<?php echo $this->contratto->getDetailsMattina()->wed ?>"  size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="wed[sera]" value="<?php echo $this->contratto->getDetailsSera()->wed ?>" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Giovedì</b></td>
+                <td><input class="iText" type="text" name="thu[mattina]" value="<?php echo $this->contratto->getDetailsMattina()->thu ?>"  size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="thu[sera]" value="<?php echo $this->contratto->getDetailsSera()->thu ?>" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Venerdì</b></td>
+                <td><input class="iText" type="text" name="fri[mattina]" value="<?php echo $this->contratto->getDetailsMattina()->fri ?>"  size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="fri[sera]" value="<?php echo $this->contratto->getDetailsSera()->fri ?>" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Sabato</b></td>
+                <td><input class="iText" type="text" name="sat[mattina]" value="<?php echo $this->contratto->getDetailsMattina()->sat ?>" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="sat[sera]" value="<?php echo $this->contratto->getDetailsSera()->sat ?>" size="5px" maxlength="4"/></td>
+        </tr>
+        
+    </table>
+    <input type="hidden" name="contratto_id" value="<?php echo $this->contratto->getId(); ?>" /> 
+    <input type="hidden" name="id_details_mattina" value="<?php echo $this->contratto->getDetailsMattinaId() ?>" /> 
+    <input type="hidden" name="id_details_sera" value="<?php echo $this->contratto->getDetailsSeraId() ?>" /> 
+    <input type="submit" name="submit" id="submit" value="Salva"/>
+    </form>
+    
+    
+    
+</div>

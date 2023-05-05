@@ -1,0 +1,121 @@
+<?php
+
+$situazione = array(
+         "0" => "In lavorazione",
+         "1" => "Accettato",
+         "2" => "Accettato senza sostituto",
+         "3" => "Rifiutato" ,
+         "4" => "Annullato"
+    );
+?>
+
+
+<h2>Modifica richiesta utente</h2>
+<?php echo $this->messaggio; ?>
+<?php if(isset($this->richiesta)) { //print_r($this->richiesta); ?>
+
+
+<table>
+    <tr><td>Richiesta n: </td><td><?php echo $this->richiesta->richiesta_id ?></td></tr>
+    <tr><td>Richiedente: </td><td><?php echo $this->richiesta->getUser()  ?></td></tr>
+    <tr><td>Dal: </td><td><?php echo $this->formatDate($this->richiesta->dateStart) ?></td></tr>
+    <tr><td>Al: </td><td><?php echo $this->formatDate($this->richiesta->dateStop) ?></td></tr>
+    <tr><td>Totale giorni: </td><td><?php echo  $this->richiesta->giorni ?></td></tr>
+    <tr><td>Tipo assenza: </td><td><?php echo $this->tipologia($this->richiesta->tipologia_id);   ?></td></tr>
+    <tr><td>Situazione attuale: </td><td><?php echo $this->status($this->richiesta->status)   ?></td></tr>
+    <tr><td>Note: </td><td><?php echo $this->richiesta->note ?></td></tr>
+    
+    
+</table>
+ 
+<hr size="1" />
+
+<form action="" method="post" >
+    <table>
+        <tr>
+            <td>Seleziona </td> 
+            <td>
+            <select name="status">
+                <option value="<?php echo $this->richiesta->status ?>"><?php echo $situazione[$this->richiesta->status] ?></option> 
+                <?php foreach($situazione as $k => $v) {  
+                if($k == $this->richiesta->status) {
+                    continue;
+                }
+                ?>
+                <option value="<?php echo $k ?>"><?php echo $v ?></option>
+                <?php } ?>
+            </select>
+            </td>
+        </tr>
+    
+    
+    <tr><td>Inserisci Note:</td>
+    <td><textarea name="note" rows="5" cols="30"></textarea></td>
+    </tr>
+    
+    
+
+    
+    <tr>
+    <td>Seleziona Sostituto</td>
+    <td>
+    <select name="sostituto_id">
+         <option value="0">Senza sostituto</option>
+        <?php 
+            foreach($this->sostituti as $k => $v) {
+                if((int)$this->richiesta->user_id == (int)$v['user_id']) {
+                    continue;
+                }  
+                    echo "<option value=\"".$v['user_id']."\">" . $v['cognome'] . ' ' .$v['nome'] . "</option>"; 
+            }
+         
+        ?>
+    </td></tr>
+    
+    
+    <tr>
+        <td>Invia Email al sostituto</td>
+        <td><input type="checkbox" name="sendmail" value="1" /></td>
+        
+        
+    </tr>
+    
+    
+    <!--<tr><td>Hotel</td>
+    <td>
+    <input type="text" name="hotel" />
+    </td></tr>
+    <tr><td>Budget</td>
+     
+    <td>
+    <input type="text" name="budget" />
+    </td></tr>
+    
+    <tr>
+        <td>Documento (DA FARE)</td>
+        <td></td>
+    </tr>-->
+     
+    
+    
+    <input type="hidden" name="richiesta_id" value="<?php echo $this->richiesta->richiesta_id; ?>" />
+    <input type="hidden" name="user_id" value="<?php echo $this->richiesta->user_id; ?>" />
+    <input type="hidden" name="dateStart" value="<?php echo $this->richiesta->dateStart; ?>" />
+    <input type="hidden" name="dateStop" value="<?php echo $this->richiesta->dateStop; ?>" />
+    <input type="hidden" name="giorni" value="<?php echo $this->richiesta->giorni; ?>" />
+    <input type="hidden" name="tipologia_id" value="<?php echo $this->richiesta->tipologia_id; ?>" />
+    
+    
+    <tr><td><input type="submit" name="submit" value="Salva" /></td><td></td></tr>
+    </table>
+    
+</form>
+
+
+
+
+<?php } else { ?>
+    
+    <h3>Richiesta non presente</h3>
+    
+<?php } ?>

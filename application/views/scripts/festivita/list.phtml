@@ -1,0 +1,68 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+
+<script>
+  $(function(){  
+        $("#festivita").chromatable({
+                width: "auto", 
+		height: "auto" ,
+                scrolling: "yes"
+	});	
+  });
+</script>
+
+
+<h3>Elenco festivit&agrave;</h3>
+<p><u>Il giorno di Pasqua e Pasquetta è calcolato in automatico quindi non aggiungerlo</u></p>
+
+<table id="festivita"   cellspacing="5px" border="0px" cellpadding="5px">
+    
+    <thead align="left">
+    <th>Giorno e Mese</th>
+     
+    <th>Descrizione</th>
+    <th>Tipo festa</th>
+    <th>Sede</th>
+    <th>Lavorativo</th>
+     <th>Azioni </th>
+    </thead>
+    <tbody>
+    
+
+
+
+
+
+<?php foreach($this->list as $k => $v) { ?>
+     
+        <tr>
+            <td><?php echo $v['giorno'] . ' ' . $this->mese($v['mese']) ?></td>
+             
+            <td><?php echo ucfirst($v['descrizione']) ?></td>
+            <td>
+                <?php 
+                    if($v['nazionale'] == 1) {
+                        print 'Festa nazionale';
+                    } elseif($v['infrasettimanale'] == 1 ) {
+                        print 'Festa infrasettimanale';
+                    } elseif($v['patrono'] == 1) {
+                        print 'Festa patronale';
+                    }
+                
+                ?>
+            </td>
+            <td><?php ( $v['sede_id'] == (int)0 ) ?   print 'Tutte le sedi' :  print $this->sede( $v['sede_id'] ) ?></td>
+            <td><?php ( $v['lavorativo'] == (int)0 ) ?   print 'Non lavorativo' :   print 'Lavorativo'  ?></td>
+            <td><a href="<?php echo $this->baseUrl('index.php') ?>/festivita/update/id/<?php echo $v['festivita_id']; ?> ">Modifica</a></td>
+            
+        </tr>     
+  
+     
+ <?php } ?>
+
+ 
+  
+    </tbody>
+    </table>

@@ -1,0 +1,81 @@
+$t_residuo = $UR->findByUser($this->_user_id, $options);
+                        Prisma_Logger::log("ferie utilizzabili gg " . $t_residuo->totale);
+                        if($t_residuo != null) {
+                            if($t_residuo->totale < $giorni ) {
+                                if($t_residuo->totale <= 0 ) {
+                                    echo "<h4>Attenzione, hai utilizzato tutti i giorni di ferie disponibili.</h4>";
+                                } else {
+                                   echo "<h4>Attenzione, il totale dei giorni di ferie residui che puoi utilizzare  è di " . (int) $t_residuo->totale .".</h4>";
+                                }
+                                return;
+                            } 
+                        } else {
+                            echo "<h4>Attenzione, la tabella residui non risulta presente, contattare l'amministrazione.</h4>";
+                            return;
+                        }
+                    } //fine $g_enable_check_residui_for_user
+                    
+                    
+                    //
+                    if( ON == $g_enable_blocco_giorni ) {
+                        
+                        $count = 0;
+                        $anno_da_valutare = 2014;
+                        
+                        $max_ferie = MAX_FERIE;
+                        // devo cercare i giorni assegnati e in lavorazione totali del 2014
+                        // e fare una sottrazioni con i giorni del 2014 che sto chiedendo adesso
+                        
+                        
+                        $EM = new Application_Model_EventiMapper();
+                        $x = $EM->contaAssegnatePerUtenteEdAnno($this->_user_id, FERIE, $anno_da_valutare) ;
+                        
+                        
+                        // ---------------------------
+                        // controllo giorni richiesti in lavorazione per il 2014
+                        $values = array(
+                          'user_id' => $this->_user_id,
+                          'tipologia_id' => FERIE,
+                          'status' => 0  
+                        );
+                        
+                        $rs = $this->_table->requestFindBy( $values );
+                        //Prisma_Logger::log( "tuple n. " . $rs->count() );
+                        if($rs->count() > 0 ) {
+                            foreach($rs as $_req => $row) {
+                                Application_Service_Tools::emptyFerieEffettive();
+                                $t_days = Application_Service_Tools::getArrayOfActualDays($row->dateStart, $row->dateStop);
+                                //Prisma_Logger::log($t_days);
+                                foreach($t_days as $k => $date) {
+                                     $_year = substr($date, 0, 4);  // year
+                                     if($_year != $anno_da_valutare) {
+                                         unset($t_days[$k]);
+                                     }
+                                }
+                                
+                                //Prisma_Logger::log( "array: " . count($t_days) );
+                                $count += count($t_days);
+                                unset($t_days);
+                                 
+                                Prisma_Logger::log("giorni richiesti per il 2014: " . $count);
+                            }
+                            
+                        }
+                        //Prisma_Logger::log($rs);
+                        Application_Service_Tools::emptyFerieEffettive();
+                        unset($t_days);
+                        $t_days = Application_Service_Tools::getArrayOfActualDays($start, $stop);
+                        foreach($t_days as $k => $date) {
+                            $_year = substr($date, 0, 4);  // year
+                            if($_year != $anno_da_valutare) {
+                                unset($t_days[$k]);
+                            }
+                        }
+                        $count += count($t_days); 
+                        unset($t_days);
+                        
+                        
+                        if($count > $max_ferie) {
+                            Prisma_Logger::log( "ferie per il 2014 maggiori di quelle assegnate" );
+                            return;
+                        }

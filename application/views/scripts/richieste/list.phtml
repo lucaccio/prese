@@ -1,0 +1,633 @@
+<?php
+    //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+    $this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+ 
+<style type="text/css">
+     .even {
+        background-color:whitesmoke;
+    }
+</style>
+<script>
+   
+$(function(){  
+      
+    var pathname = window.location.pathname;
+    var l = window.location;
+    var base_url = l.protocol + "//" + l.host + "/" + l.pathname.split('/')[1];
+    var annullaBtn = $(".annulla_richiesta_accettata"); 
+    var cancella_richiesta = $(".cancella_richiesta");
+    var current_request_id = null;
+      
+    /* user id */
+    var uid = <?php echo $this->uid; ?>
+    
+    //url di base
+    var url = "<?php echo $this->baseUrl('index.php') ?>";
+
+    $(".assegna_immediato").click(function(e){
+ 
+        e.preventDefault();
+
+        var id = $(this).data('request')
+        $.ajax({
+            type: "POST",
+            url: url + "/richieste/ajaxGetRequest",            
+            data: {
+                request: id
+            },
+            dataType: "json",
+            success: function(response) {
+                
+                //console.log(response.data)
+               // alert(response.data.richiesta_id)
+                var response = response.data;
+                var arr = new Array();
+         
+         
+            
+                var data = {
+                        richiesta: response.richiesta_id,
+                        utente:    response.user_id,
+                        sostituto: id,
+                        tipologia: response.tipologia_id,
+                        inizio:   response.dateStart,
+                        fine: response.dateStop,
+                        qta: response.qta,
+                        status:  2,
+                        struttura_id: 0,
+                        note: "",
+                        email: true,
+                        sostituto: 0
+                    }
+
+                arr[0] = data;
+                //console.log("data: ", arr)
+
+                $.ajax({
+                    type: "POST",
+                    url: url + "/assenze/insert", 
+                    data: {
+                        dati: arr
+                    },
+                    dataType: "json",
+                    success: function(response) {
+                        alert(response);
+                        $("#riga-"+  data.richiesta).hide('slow', function() { 
+                            $("#riga-"+  data.richiesta).remove(); 
+                             
+                        });
+                    }, 
+                    error: function(response) {
+                        console.log(response)
+                    }
+                });
+            }, 
+            error: function(response) {
+                console.log(response)
+            }
+        });
+
+
+
+    });
+ 
+
+    $("#annulla_form").dialog({
+           autoOpen: false,
+           title: 'Annullamento richiesta',
+           modal: true,
+           resizable: false,
+           width: '500',
+           buttons: [ 
+               { 
+                   text: "Si, informa anche il sostituto", click: function() { 
+                       
+                       var id =  current_request_id ;
+                       //console.log(id); 
+                       delete_accepted_request(id, true, function(data){
+                           if(data.success == true) {
+                               alert('Richiesta annullata con successo.');
+                               $("#riga-"+id).hide('slow');
+                           }else {
+                               alert(data.error);
+                           }
+                       });
+                       $( this ).dialog( "close" ); 
+                   } 
+               },
+               {
+                   text: "No", click: function() { 
+                       var id =  current_request_id ;
+                       //console.log(id); 
+                       delete_accepted_request(id, false, function(data){
+                           if(data.success == true) {
+                               alert('Richiesta annullata con successo.');
+                               $("#riga-"+id).hide('slow');
+                           } else {
+                               alert(data.error);
+                           }
+                       })
+                       $( this ).dialog( "close" ); 
+                   }
+               },
+               {
+                   text: "Esci", click: function() { 
+                       $( this ).dialog( "close" ); 
+                   }
+               }       
+           ]
+    });
+       
+       
+    cancella_richiesta.click( function(e) {
+        e.preventDefault();
+        var id = $(this).attr('href');
+        var  c = confirm("Cancellare la richiesta in lavorazione?");
+        if(c === true) {
+            delete_processing_request( id, uid, function(data){
+                if(data.success === true) {
+                    alert('Richiesta cancellata con successo.');
+                   // $("#riga-"+id).hide('slow');
+                    $("#riga-"+ id).remove();
+                        var n = $( ".selettore" ).length;
+                        if(!n) {
+                            $("#btnMultiselect").attr('disabled', true)
+                        }
+                } else {
+                    alert(data.error);
+                }
+            })
+        } 
+    });
+      
+      
+      // annullamento richieste accettate 
+    annullaBtn.click(function(e){
+        current_request_id = $(this).attr('richiesta_id');
+        $("#annulla_form").dialog('open');
+        e.preventDefault();
+    }); 
+          
+     
+    $("#_tabElenco").chromatable({
+        width: "100%", 
+		height: "auto" ,
+        scrolling: "yes"
+	});
+        	
+        $(".select").selectBox(); 
+       
+      
+        $( "input[type=submit]" )
+            .button()
+            .click(function( event ) {
+                //event.preventDefault();
+                //alert();
+        }); 
+         
+        
+        $("#rifiuta").dialog({
+            autoOpen: false,
+            resizable: false,
+            width:400,
+            title: 'Inserisci motivo del rifiuto',
+            modal: true,
+            buttons: {
+                "Invia" :  function(){
+                    var _this = this;
+                    var id = $("#richiesta_id").attr('value');
+                    var note = $("#note").val();
+                    var id_motivazione = $("#response_select").val();
+                    var std_response = '';
+                    if(id_motivazione > 0) {
+                        std_response = $("#response_select :selected").text();
+                    }
+                    
+                    var data =  {
+                            richiesta_id: id,
+                            std_response: std_response,
+                            note: note
+                        };
+                        
+                    /* invio la mail di rifiuto accettazione richiesta */
+                    send_refused( data, function(data) {
+                        if(data.success === true) {
+                             $("#note").val('');
+                             $(_this).dialog('close');
+                             $("#riga-" + id).hide();
+                             alert("Messaggio inviato correttamente.");
+                        }
+                    }); 
+                },
+                "Annulla" : function() {
+                    $("#note").val('');
+                    $(this).dialog('close');
+                }
+            }
+        });
+        
+        
+        
+      
+    $('.rifiutaLnk').click(function(e) {
+        id = $(this).attr('href');
+        $("#richiesta_id").attr('value', id);
+        load_standard_response( function(data) {
+            $("#response_select").empty();
+            $("#response_select").append( $("<option></option>").val('-1').text('Selezionare motivazione') );
+            $.each(data, function(i,v){
+                $("#response_select").append( $("<option></option>").val(v.id).text(v.description) );
+            });
+            $("#rifiuta").dialog('open');
+        });
+         
+        e.preventDefault();
+    });
+    
+   
+    $('.rifiutaLnks').click(function(e) {
+        id = $(this).attr('href');
+        var data =  {
+            richiesta_id: id,
+        };
+
+        /* invio la mail di rifiuto accettazione richiesta */
+        send_refused( data, function(data) {
+            if(data.success === true) {
+                $("#note").val('');
+                $("#riga-" + id).hide();
+                alert("Richiesta rifiutata.");
+            }
+        });  
+        e.preventDefault();
+    });
+    
+    
+    
+    
+});
+</script>
+
+<form id="rifiuta">
+    <table>
+        <tr>
+            <td><label>Motivazione</label></td>
+            <td><select id="response_select"></select></td>
+        </tr>
+        <tr>
+            <td valign="top"><label>Note</label></td>
+            <td><textarea id="note"  style="width: 22em; height: 10em;"></textarea></td>
+        </tr>
+    </table>
+    <input type="hidden" name="richiesta_id" id="richiesta_id" /> 
+</form> 
+
+<?php 
+
+ 
+//"2" => "Accettato senza sostituto",
+$status = array(
+        "0" => "In lavorazione",
+        "1" => "Accettato",
+        
+        "3" => "Rifiutato",
+        "4" => "Annullato"
+    );
+
+$mesi = array(
+        "0" => "Intero anno",
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+);
+?>
+
+<h3>Elenco Richieste</h3>
+<?php
+    if($this->nextYearRequest) {
+        echo "<p style='color:red;'> Attenzione, ci sono $this->nextYearRequest richieste non evase per l'anno prossimo. </p>";
+    }
+?>
+<form action="<?php echo $this->baseUrl('index.php') . '/richieste/list' ?>" method="post" >
+   
+    <select name="user_id" class="select">
+        
+        <?php if($this->user_id == 0) {?>
+                <option value="0">Tutti i dipendenti</option>
+        <?php } ?>
+        <?php if($this->user_id > 0) {?>
+            <option value="<?php echo $this->user_id ?>"><?php echo $this->users[$this->user_id] ?></option> 
+            <option value="0">Tutti i dipendenti</option>
+        <?php } ?>
+        
+            <?php foreach($this->users as $k => $v) { ?>
+                <?php if($k == $this->user_id) { continue; } ?>
+                <option value="<?php echo $k ?>"><?php echo $v ?></option>
+        <?php } ?>
+    </select>
+     
+    
+    <select name="tipo" class="select">
+        
+        <?php if($this->tipo == 0) {?>
+                <option value="0">Tutte le tipologie</option>
+        <?php } ?>
+        <?php if($this->tipo > 0) {?>
+            <option value="<?php echo $this->tipo ?>"><?php echo $this->tipologia($this->tipo) ?></option> 
+            <option value="0">Tutte le tipologie</option>
+        <?php } ?>
+        
+            <?php foreach($this->tipi as $k => $v) { ?>
+                <?php if($v->getId() == $this->tipo) { continue; } ?>
+                <option value="<?php echo $v->getId() ?>"><?php echo $v->getDescrizioneAdmin() ?></option>
+        <?php } ?>
+    </select>
+     
+    
+    
+    
+    
+    <select name="status"class="select">
+        <option value="<?php echo $this->status?>"><?php echo $this->status($this->status)?></option> 
+        <?php foreach($status as $k => $v) { ?>
+                <?php if($this->status == $k) { continue; } ?>
+                <option value="<?php echo $k ?>"><?php echo $v ?></option>
+        <?php } ?>
+    </select>
+    
+    <select name="month"class="select">
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php for($i = 0; $i <= 12   ; $i++) { 
+            if($i == $this->month) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $mesi[$i] ?></option>
+        <?php } ?>
+    </select> 
+    
+    <select name="year" class="select">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option> 
+        <?php for($i = 2012; $i<=date('Y') + 1 ; $i++) { 
+            if($i == $this->year) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $i ?></option>
+        <?php } ?>
+    </select>
+      
+    <input type="submit" name="submit" value="Cerca" />
+     
+</form>
+<script>
+$(function(){ 
+
+    var toDelete = [];
+
+    $(".multisel").hide();
+
+    $("#btnCancMultiselect").hide();
+    <?php
+    if(!count($this->elenco)) { ?>
+        $("#btnMultiselect").attr('disabled', true);
+    <?php } ?>
+    
+    $("#btnMultiselect").click(function(){    
+        
+        $(".multisel").toggle();
+
+        // nascondi | mosra bottone cancella
+        $("#btnCancMultiselect").toggle();
+
+        $("#allMulticheck").prop( "checked", false );
+        $(".selettore").prop( "checked", false );
+
+        countChecked();
+        //$("#btnCancMultiselect").attr('disabled', true)
+    })
+
+    $("#allMulticheck").click( function() {
+ 
+        if( $("#allMulticheck").attr('checked')   ) {
+            $(".selettore").prop( "checked", true );
+            $("#btnCancMultiselect").attr('disabled', false)
+            countChecked();
+        } else {
+            $(".selettore").prop( "checked", false );
+            $("#btnCancMultiselect").attr('disabled', true)
+            countChecked();
+        }
+
+    })
+
+    //
+    var countChecked = function() {
+        var m = $( ".selettore").length;
+        var n = $( ".selettore:checked" ).length;
+        $( "#conteggio" ).html("<span style=\"padding: 5px;font-size: 120%; color: green; background: inherit;\" ><b>" +  n + (n === 1 ? " richiesta selezionata" : " richieste selezionate") + "</b></span>" );
+        
+        if(n === 0) { 
+            $("#allMulticheck").prop('checked', false) 
+            $("#btnCancMultiselect").attr('disabled', true)
+            $( "#conteggio" ).text("");
+        } else {
+            $("#btnCancMultiselect").attr('disabled', false)            
+        }
+
+        if(m === n) {
+            $("#allMulticheck").prop('checked', true) 
+        } else {
+            $("#allMulticheck").prop('checked', false) 
+        }
+
+    };
+
+    $(".selettore").click( function(e) {      
+        countChecked();
+    });
+
+
+
+    $("#btnCancMultiselect").click( function() {
+
+        var uid = <?php echo $this->uid; ?> ;
+
+        var  c = confirm("Vuoi cancellare le richieste selezionate?");
+
+        if(c === true) {
+            
+            $.each( $( ".selettore:checked" ), function(i, element) { 
+                var id = element.value;
+
+                //console.log(" elemento di array: " , i)
+                delete_processing_request( id, uid, function(data) {
+                    if(data.success === true) {                    
+                        console.log("cancellato  ", id);
+                        $("#riga-"+ id).remove();
+                        var n = $( ".selettore" ).length;
+                        if(!n) {
+                            $("#btnMultiselect").attr('disabled', true)
+                            // nascondo la casella
+                            $(".multisel").toggle();
+                            //cancello la scritta
+                            $("#conteggio" ).html("");
+                            //nasco il tasto delete
+                            $("#btnCancMultiselect").toggle();
+                        } else {
+                            // spunto la casella
+                            $("#allMulticheck").prop( "checked", false );
+                            $("#conteggio" ).html("");
+                            $("#btnCancMultiselect").attr('disabled', true)   
+                        }
+                    } else {
+                        alert(data.error);
+                    }
+                })
+                
+            })
+           
+           
+        
+        } 
+    })
+
+});
+
+
+
+</script>
+ 
+<p> 
+     <div  style="float:left; display:block;">
+        <?php   if($this->status == 0) { ?>
+            <input type="button" id="btnMultiselect" value="Cancellazione multipla"  /> 
+            <input type="button" id="btnCancMultiselect" value="Cancella selezionati"  />
+        <?php } ?>    
+
+    </div> 
+    <div  style="float:left; display:block;" id="conteggio"></div>  
+    <div style="clear:both;"></div>
+</p>
+ 
+<table id="tabElenco" >
+    <thead align="left">
+    <th class='multisel'><input type='checkbox' value="0" id="allMulticheck"/></th>
+    <th>Richiesta n:</th>
+    <th>Del</th>
+    <th>Richiedente</th>
+    <th>Ruolo</th>
+    <th>Tipo di richiesta</th>
+    <th>Data Inizio </th>
+    <th>Data Fine </th>
+    <th> Giorni/Ore </th>
+    <th>Stato</th>
+    <th>Inserita da</th>
+    <th>Azioni</th>
+    </thead>
+    <tbody>
+ <?php
+    if(isset($this->elenco)) {
+
+        $counter = 0;
+
+        foreach($this->elenco as $row) {
+           
+            $class = ($counter % 2) ? 'even' : 'odd';
+
+            $counter++;
+
+            echo "<tr class='" . $class . "' id='riga-" . $row->richiesta_id . "'>";
+
+
+            if($row->status == 0) {
+                echo "<td class='multisel' ><input class='selettore' type='checkbox' value=" . $row->richiesta_id .  "></td>";
+            }
+            
+            echo "<td>$row->richiesta_id</td>";
+            echo "<td>" . $this->formatDate($row->_update , 'd-m-Y H:i:s') . "</td>";
+            
+            
+            echo "<td>" . $this->utente($row->user_id, true) . "</td>";
+            echo "<td>" . $this->ruolo($row->user_id)."</td>";
+            echo "<td>" . $this->descrizionetipoadmin($row->tipologia_id)."</td>"; 
+           
+            echo "<td>" . $this->formatDate($row->dateStart, 'd/m/Y') . "</td>";
+            echo "<td>" . $this->formatDate($row->dateStop, 'd/m/Y') . "</td>";
+            
+            //logica per visualizzare eventuali giorni a cavallo con capodanno;
+            $gg = $row->giorni;
+            if(isset($row->gg)) {
+                if($row->giorni != $row->gg) {
+                    $gg = $row->gg . " (su " .$row->giorni.")";
+                }
+            }
+
+            $_giornate = $row->giorni;
+
+            $_quantita = $row->qta;
+
+            if($_giornate !== $_quantita) {
+                $_qta = $_quantita . " ore";
+            } else {
+                $_qta = $_giornate == 1 ? $_giornate . " giorno" : $_giornate . " giorni" ;
+            }
+
+
+            echo "<td align='center'>" . $_qta . "</td>";  
+
+
+            echo "<td>".$this->status($row->status)."</td>";
+            
+            echo "<td>" . $this->utente( $row->created_by_user_id , true). "</td>";
+            echo "<td>"; 
+            
+            if($row->status == 0) {  
+              /*  echo "<a href=\"". $this->baseUrl('index.php')."/richieste/modifica/richiesta_id/$row->richiesta_id\">Modifica</a> | "; */
+           //   echo "<a href=\"". $this->baseUrl('index.php')."/richieste/assegna/richiesta_id/$row->richiesta_id\">Accetta</a> | ";  
+          //    echo "<a href=\"". $this->baseUrl('index.php')."/richieste/assegna/richiesta_id/$row->richiesta_id\">Accetta con sostituto</a> | ";
+          echo "<a class='assegna_immediato' href=\"#\" data-request=". $row->richiesta_id .  "> Accetta subito </a> | ";    
+          echo "<a href=\"". $this->baseUrl('index.php')."/richieste/assegna/richiesta_id/$row->richiesta_id\">Assegna</a> | ";
+            }
+            
+            if($row->status == 1) {  
+                
+                echo "<a class='annulla_richiesta_accettata' href='#' richiesta_id='$row->richiesta_id'>Annulla richiesta</a>";
+                if($row->sostituto_id == 0) {
+                    echo " <a href=\"". $this->baseUrl('index.php')."/sostituzioni/edit/sostituzione_id/$row->sostituzione_id\">Assegna sostituto</a>  ";
+                }
+                
+            }
+            
+            if($row->status != 3 && $row->status != 1 && $row->status != 4) {  
+                 #echo "<a href=\"". $this->baseUrl('index.php')."/richieste/elimina/richiesta_id/$row->richiesta_id\">Cancella</a> | ";
+            }
+            if($row->status == 0) { 
+               # echo "<a href=\"". $this->baseUrl('index.php')."/richieste/elimina/richiesta_id/$row->richiesta_id\">Cancella</a> |";
+                echo "<a class=\"cancella_richiesta\" href=\""  . $row->richiesta_id.  "\">Cancella</a> |";
+                echo "<a class=\"rifiutaLnk\" href=\""  . $row->richiesta_id.  "\">Rifiuta</a>";
+                  
+            }
+            
+            if($row->status == 4) {  
+               // echo "<a href=\"". $this->baseUrl('index.php')."/richieste/assegna/richiesta_id/$row->richiesta_id\">Riassegna</a>   ";
+            }
+            echo "</td>";
+            echo "</tr>";
+        }
+     }
+    ?>
+    </tbody>
+ </table>
+
+<div id="annulla_form">
+    <p align="center">Stai per annullare una richiesta precedentemente accettata.</p>
+    <p align="center">Verrà inviata in automatico una email di notifica all'utente.</p>
+    <p align="center">Desideri informare via email anche il sostituto?</p>
+</div>
+
+ 

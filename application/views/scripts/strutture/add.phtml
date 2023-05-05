@@ -1,0 +1,15 @@
+<h3>Aggiungi struttura ricettiva</h3>
+
+<form action="" method="POST">
+    
+    <table>
+        <tr><td>Denominazione</td><td><input type="text" name="denominazione" value="" size="40px"/></td></tr>
+        <tr><td>Indirizzo</td><td><input type="text" name="indirizzo" value="" size="40px"/></td></tr>
+        <tr><td>Citt&agrave;</td><td><input type="text" name="citta" value="" size="40px"/></td></tr>
+        <tr><td>Telefono</td><td><input type="text" name="telefono" value="" size="40px"/></td></tr>
+        <tr><td>Email</td><td><input type="text" name="email" value="" size="40px"/></td></tr>
+        <tr><td>Coordinate</td><td><input type="text" name="coordinate" value="" size="40px"/></td></tr>
+    </table>
+    <input type="submit" name="submit" value="Salva" />
+    <input type="hidden" name="token"  value="<?php echo $this->token ?>" />
+</form>

@@ -1,0 +1,144 @@
+<script>
+    $().ready(function(){
+        var base = "<?php echo $this->baseUrl('index.php') ?>";
+        
+        $("#add_button").on('click', function(e){
+            dialog.dialog("open");
+        })
+        
+        
+        dialog = $("#new_global_var_form").dialog({
+            autoOpen: false,
+            modal:    true,
+            height: 250,
+            width: 450,   
+            buttons: {
+                "Salva": function() {
+                    
+                   var name        = $.trim( $("#input_name").val() );
+                   var description = $("#input_textarea").val();
+                   var value       = $("#input_value").val();
+                    
+                   if(name == '') { 
+                       alert("inserire nome variabile");
+                       return;
+                   }
+                   
+                   name = name.replace( new RegExp("\\s","g") , "_");
+                                     
+                   $.ajax({
+                       type: "POST",
+                       url: base + "/ajax/save-global-config-value",
+                       dataType: "json",
+                       data : {
+                           name: name,
+                           description: description,
+                           value: value
+                       },
+                       success: function(data) {
+                           if(data.success == false) {
+                               alert(data.error);
+                               return;
+                           }
+                           var id = data.configuration_id;
+                           var txt = "Disattivato";
+                           if(value == 1) txt = "Attivato";
+                           $("#configuration_table").append("<tr id='tr_" + id + "'><td>"+name+"</td><td>"+description+"</td><td><a class='change' id='row_id_"+ id + "' cid='"+id+"' value='"+value+"' href=''>" + txt +"</a></td><td><a class='delete' cid='"+id+"' href=''>Cancella</a></td></tr>");
+                           dialog.dialog( "close" );
+                       }
+                   });
+                    
+                   
+                },
+                "Cancella": function() {
+                  dialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                $("#form")[0].reset();
+            }
+     
+        });
+        
+        
+        $(document).on('click',".delete", function(e){
+            e.preventDefault();
+            var id = $(this).attr('cid');
+            $.ajax({
+                type: "POST",
+                url: base + '/ajax/delete-global-config-value',
+                data: {
+                    id: id,
+                },
+                dataType: "json",  
+                
+                success: function(data){
+                   if(data.success  == false) {
+                       alert(data.error);
+                   }
+                   $("#tr_" + id).remove()                     
+                },
+                error: function(){}
+            });
+        });
+        
+        
+        $(document).on('click',".change", function(e){
+            e.preventDefault();
+            var id = $(this).attr('cid') ;
+            var value = $(this).attr('value') ;
+            $.ajax({
+                type: "POST",
+                url: base + '/ajax/change-global-config-value',
+                data: {
+                    id: id,
+                    value: value
+                },
+                dataType: "json",  
+                
+                success: function(data){
+                   
+                    $("#row_id_"+ id).attr("value", data.value);
+                    (data.value == 1) ? txt = "Attivato" : txt = "Disattivato";
+                    $("#row_id_"+ id).html(txt);
+                },
+                error: function(){}
+            });
+        })
+    });
+</script>
+<h2>Variabili globali </h2>
+<table id="configuration_table">
+    <thead>
+    <th>Nome</th>
+    <th>Descrizione</th>
+    <th>Valore</th>
+    </thead>
+<tbody>
+<?php 
+foreach( $this->globals as $k => $v) {   
+    $v->value ? $r =  "Attivato" : $r =  "Disattivato";
+    echo "<tr id='tr_$v->configuration_id' ><td>" . $v->name . "</td><td>$v->description</td><td> <a class='change' id='row_id_$v->configuration_id' cid='$v->configuration_id' value='$v->value' href=''>$r</a></td><td><a class='delete' cid='$v->configuration_id' href=''>Cancella</a></td></tr>";
+} 
+?>
+</tbody>
+</table>
+
+<br />
+<button id="add_button">Aggiungi</button>
+
+<div id="new_global_var_form">
+    <form id="form">
+    <table>
+        <tr><td>Nome variabile</td><td><input id="input_name" type="text" name="name" size="35px"/></td></tr>
+        <tr><td>Descrizione</td><td><textarea id="input_textarea" name="description" cols="33"></textarea></td></tr>
+        <tr><td>Valore</td>
+            <td><select name="value" id="input_value" >
+                    <option value="0">Disattivato</option>
+                    <option value="1">Attivato</option>
+                </select>
+            </td></tr>
+         
+    </table>
+    </form>
+</div>

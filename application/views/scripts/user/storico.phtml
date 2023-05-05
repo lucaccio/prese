@@ -1,0 +1,29 @@
+
+<h3>Annualit&agrave; <?php echo date('Y') ?> </h3>
+
+<table border="0">
+    <thead align="left">
+    <th>Cognome Nome</th>
+    <th>Ferie assegnate</th>
+    <th>Residuo Ferie</th>
+    <th>Check</th>
+    <th>Permessi assegnati</th>
+    <th>Residuo permessi</th>
+    <th>Check</th>
+    </thead>
+    <tbody>
+        <?php $i = 0; foreach($this->collection as $k => $v) { 
+        ($i%2==1) ? $bgc='#DDDDDD' : $bgc='#FFFFFF';
+        ?>
+        <tr bgcolor="<?php echo $bgc ?>">
+            <td><?php echo $v['username'] ?> </td>
+            <td align="center"><?php echo $v['ferie'] ?> giorni</td>
+            <td align="center"><?php echo $v['_ferie'] ?> </td>
+            <td align="center"><?php  ($v['ferie'] - $v['_ferie']) == 0 ? null :   print 'no'; ?></td>
+            <td align="center"><?php echo $v['permessi'] ?> ore</td>
+            <td align="center"><?php echo $v['_permessi'] ?></td>
+            <td align="center"><?php  ($v['permessi'] - $v['_permessi']) == 0 ? null : print 'no'; ?></td>
+        </tr>
+        <?php $i++; } ?>
+    </tbody>
+</table>

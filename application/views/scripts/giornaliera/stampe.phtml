@@ -1,0 +1,72 @@
+ <script>
+  
+</script>
+<h3>
+    Seleziona il periodo di stampa
+</h3>
+<?php
+    
+    $mese = array(
+        1 => 'Gennaio',
+        2 => 'Febbraio',
+        3 => 'Marzo',
+        4 => 'Aprile',
+        5 => 'Maggio',
+        6 => 'Giugno',
+        7 => 'Luglio',
+        8 => 'Agosto',
+        9 => 'Settembre',
+        10 => 'Ottobre',
+        11 => 'Novembre',
+        12 => 'Dicembre'
+    );
+
+    $anno_corrente = date('Y');
+    $mese_corrente = date('n');
+    $anni_options  = null;
+    $mesi_options  = null;
+    
+    for($i = 2013; $i<= $anno_corrente + 1; $i++) {
+        $selected = null;
+        if($i == $anno_corrente) {
+            $selected = 'selected';
+        }
+        $anni_options.= "<option $selected value='$i'>$i</option>";
+    }
+        
+    for($i = 1; $i <= 12; $i++) {
+        $selected = null;
+        if($i == $mese_corrente) {
+            $selected = 'selected';
+        }
+        $mesi_options.= "<option $selected value='$i'>$mese[$i]</option>";
+    }
+    
+    
+?>
+<form action="<?php echo $this->baseUrl('index.php')?>/giornaliera/stampe/" method="POST">
+    <table border="0">
+        
+        <tr>
+            <td>Anno</td>
+            <td><select name="anno"> <?php echo $anni_options ?> </select></td>
+        </tr>
+        <tr>
+            <td>Mese</td>
+            <td><select name="mese"><?php echo $mesi_options ?></select></td>
+        </tr>
+         <tr>
+            <td valign="top">Annotazioni</td>
+            <td><textarea name="note" rows="5" cols="60"></textarea></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>nelle annotazioni  scrivere \r per andare a capo</td>
+        </tr>
+        
+    </table>
+    <br>
+    
+    <input type="submit" name="stampa"   value="Stampa Pdf" />
+    <input type="submit" name="stampa" value="Stampa Excel" />
+</form>

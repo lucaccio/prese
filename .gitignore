@@ -1,0 +1,16 @@
+
+nbproject/private/
+public/reports/
+application/configs/config.inc.php
+application/configs/application.ini
+log/
+log/syslog.txt
+.idea/
+.settings/
+.vscode/
+/sql/feriemanager_22_03_2018.sql
+/application/configs/locale.ini
+data/
+vendor/
+public/.htaccess
+vendor/

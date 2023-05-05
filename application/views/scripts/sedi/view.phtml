@@ -1,0 +1,28 @@
+<h3>Modifica nome sede</h3>
+ 
+<form action="" method="POST">
+    
+    <table>
+       <!-- <tr>
+            <td><label>Città presenti</label></td>
+            <td>
+                <select name="presenti">
+                <?php foreach($this->sedi as $k=>$v) { ?>
+                <option value="<?php echo $v->sede_id ?>"><?php echo ucfirst($v->citta) ?> </option>
+                <?php } ?>
+                </select>
+            </td>
+        </tr> 
+    
+    
+        <tr>-->
+            
+        
+    <td><label>Cambia nome città</label></td>
+    <td><input type="text" name="citta" value="<?php echo $this->citta?>"/></td>
+  </tr>
+    </table>
+    
+    <input type="submit" name="submit" value="Salva" />
+      
+</form>

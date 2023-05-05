@@ -1,0 +1,161 @@
+<?php  $this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css'); ?>
+<script>
+        
+       dates = new Date();
+       var ye = (dates.getMonth() == '11') ? dates.getFullYear() + 2 : dates.getFullYear() + 1;
+       
+       
+     $(function() {
+        function noSundays(date) {
+            return [date.getDay() != 0, ''];
+        }
+         
+        $( "#dateStart" ).datepicker({
+            beforeShowDay: noSundays,
+            defaultDate: "+1w",
+            changeMonth: true,
+            numberOfMonths: 2,
+            dateFormat: "dd-mm-yy", 
+            minDate:    "-1m",
+            maxDate: new Date(ye,11,31),
+            onClose: function( selectedDate ) {
+                $( "#dateStop" ).datepicker( "option", "minDate", selectedDate );
+            }
+        });
+        
+        $( "#dateStop" ).datepicker({
+            beforeShowDay: noSundays,
+            defaultDate: "+1w",
+            changeMonth: true,
+            numberOfMonths: 2,
+            dateFormat: "dd-mm-yy", 
+            minDate: "-1m",
+            maxDate: new Date(ye,11,31),
+            onClose: function( selectedDate ) {
+                $( "#dateStart" ).datepicker( "option", "maxDate", selectedDate );
+            }
+        }); 
+        
+        
+        
+        $( "input[type=submit]" )
+            .button()
+            ;
+        
+        
+        
+        
+        
+        
+     });//fine function
+        
+</script>
+    <style>
+        #form {
+            width: 400px; 
+        }
+        #tb {
+             width: 700px; 
+        }
+        #thead {
+            text-align: center;
+        }
+        .tr {
+            text-align: center;
+        }
+    </style>
+<h3>Modulo di richiesta ferie</h3>
+
+
+
+ 
+<div id="residui">
+    <table id="tb">
+        <thead >
+            <th id="thead" colspan="3">Ferie <?php echo date('Y') ?></th>
+            <th id="thead" colspan="3">Ferie <?php echo date('Y')  + 1 ?></th>
+        </thead>
+        <tbody>
+            <tr class="tr"><td>Spettanti</td> <td>Usate / Assegnate </td> <td>Residue</td> 
+             <td>Spettanti</td> <td>Assegnate</td> <td>Residue / In lavorazione</td></tr>
+            <tr class="tr">
+            <?php
+             
+            $arr = $this->residui ;
+            $user = $arr['user'];
+            $prev = $arr['prev'];
+                $assunzione = new Zend_Date($user->getAssunzione());
+                
+                $const = MAX_FERIE;
+                if($assunzione->toString('yyyy') == date('Y')) {
+                    $d = $assunzione->toString('d');
+                    $m = $assunzione->toString('M');
+                    $mesi = (13 - (int)$m);
+                    if((int)$d > 16) {
+                        $mesi = $mesi - 1 ;
+                    }
+                     
+                    $const = (2.17 * (int)$mesi);
+                }
+                
+                
+                    $current = date('Y');
+                    $next = date('Y') + 1;
+                    
+                    $assegnate = 0;
+                    $spettanti = 0 ;
+                    $residuo   = 0;
+                    
+                    $assegnate = $arr[$current];
+                    $spettanti = ($const + $prev);
+                    $residuo   = ($spettanti - $assegnate);
+                    
+                    echo "<td><b>" . $spettanti . "</b></td>"; 
+                    echo "<td><b>" . $assegnate . "</b></td>"; 
+                    echo "<td><b>"  . $residuo . "</b></td>"; 
+                    
+                    echo "<td><b>" . (MAX_FERIE /*+ $residuo*/ ). "</b></td>"; 
+                    echo "<td><b>" . $arr[$next] . "</b></td>"; 
+                    echo "<td><b>" . (MAX_FERIE  - $arr[$next] ) . "</b></td>"; 
+             
+            ?>
+            </tr>  
+        </tbody>
+    </table>
+</div>
+
+
+<br /><br />
+
+
+<form action="" method="post">
+    <table id="form">
+    <tr> <td>Data Inizio: </td><td><input type="text" readonly name="start" id="dateStart" value="<?php echo $this->start ?>"/></td></tr>
+    <tr> <td>Data Fine: </td><td><input type="text" readonly name="stop" id="dateStop" value="<?php echo $this->stop ?>"/></td></tr>
+    <tr> <td>Tipo Richiesta:</td><td>
+    <select name="tipologia_id">
+        <option value="">Seleziona tipo</option>
+        <?php
+            foreach($this->tipologie as $row) {
+                // se l'user è sostituto non mostra lopzione 'Santo patrono'
+                if($user->isSostituto()){
+                    if($row->isPatrono()) {
+                        continue;
+                    }
+                }
+                echo "<option value=\"".$row->getId()."\">".$row->getDescrizione()."</option>";
+            }
+        ?>
+    </select>
+    </td></tr>
+    <tr><td valign="top">Note: </td>
+        <td><textarea  name="note_user" rows="8" ></textarea></td>
+    </tr>
+    <tr></tr>
+    <tr><input type="hidden" name="totale_ferie" value="<?php echo $this->totale_ferie ?>"</tr>
+    <tr><input type="hidden" name="totale_permessi" value="<?php echo $this->totale_permessi ?>"</tr>
+    <tr></tr>
+    <tr><td><input type="submit" value="Invia richiesta" name="submit" /></td></tr>
+    </table>
+ </form>
+ 

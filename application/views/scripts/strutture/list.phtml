@@ -1,0 +1,54 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+
+<h3>Elenco Strutture ricettive</h3>
+<?php if(isset($this->elenco)) { ?>
+
+<table cellpadding="5">
+    <thead>
+        <tr align="left">
+            <th>ID</th>
+            <th>Denominazione</th>
+            <th>Indirizzo</th>
+            <th>Citt&agrave;</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Mappa</th>
+            <th>Azioni</th>
+        </tr>
+    </thead>    
+    <tbody>
+        <?php foreach($this->elenco as $k => $v) { ?>
+        <tr>
+            <td><?php echo $v->struttura_id ?></td>
+            <td><?php echo $v->denominazione ?></td>
+            <td><?php echo $v->indirizzo ?></td>
+            <td><?php echo ucfirst($v->citta) ?></td>
+            <td><?php echo $v->telefono ?></td>
+            <td><?php echo $v->email ?></td>
+            
+            <td>
+                <?php
+                    (trim($v->coordinate) != '') ?  print("<a href=\"\">Vedi mappa</a>") : NULL
+                ?>
+                
+            </td>
+            <td><a href="<?php echo $this->baseUrl('index.php')?>/strutture/update/id/<?php echo $v->struttura_id ?>">Modifica</a></td>
+        </tr>
+        <?php } ?>
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+<?php } else { ?>
+<h3>Nessuna struttura presente</h3>
+<?php } ?>
+

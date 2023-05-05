@@ -1,0 +1,328 @@
+ <?php
+ 
+ $disabledClose =  'disabled';
+ $disabledAdd   = ''; 
+ 
+ if($this->user->hasActiveContract()) {
+     $disabledClose = '';
+     //@28/11/2022
+     // commento la riga sotto perchè se chiudo un contratto 
+     // con data maggiore di oggi non mi permette di aggiungere contratto
+     //vedi model/User.getActiveContract() riga 688 nell'sql
+    // $disabledAdd   = 'disabled'; 
+ }
+ 
+ 
+ ?>
+
+<script>
+    
+    var base = "<?php echo $this->baseUrl('index.php') ?>";
+    var user_id = "<?php echo $this->user->getId() ?>";
+    var refresh = function() {
+            window.location.href = "<?php echo $this->baseUrl('index.php')?>/user/contratto/user_id/" + user_id;
+    }
+
+    
+    $(function(){
+
+
+
+        console.log( $("#data_contratto_start")  );
+
+         $( ".datepicker" ).datepicker({
+              dateFormat: "yy-mm-dd"
+         });
+        
+        
+    
+        $("#closeDialog").dialog({
+            title: "Chiusura contratto",
+            autoOpen: false,
+            height: 200,
+            width: 300,
+            modal: true,
+            resizable: false,
+            buttons: {
+                "Salva": function() {
+                    var _this = this;
+                    var id    = $("#uc_id").val();
+                    var stop  = $("#stopDate_closeDialog").val();
+                    var start = $("#startDate_closeDialog").val();
+                    console.log(start + '#' + stop);
+                    if(stop == '') {
+                        alert("Inserire la data di chiusura contratto (anno-mese-giorno)");
+                        return;
+                    }
+                    if(stop < start) {
+                        alert("Errore, la data di chiusura contratto è precedente a quella di inzio contratto.");
+                        return;
+                    }
+                    
+
+                    
+                    
+                    $.ajax({
+                        url: base + "/ajax/user-close-contract",
+                        data:{
+                            id: id,
+                            stop: stop,
+                        },
+                        dataType: "json",
+                        success: function(data) {
+                            if(data.success == true) {
+                                alert(data.message);
+                                $( _this ).dialog( "close" );
+                                refresh();
+                            } else if(data.success == false) {
+                                console.log(data.error)
+                                alert(data.error);
+                            }
+                        },
+                        error: function(e,x,t) {
+                            console.log(e);
+                            console.log(x);
+                            console.log(t);
+                            if(e.status==404) {
+                                alert(e.responseText);
+                            }
+                        }
+                    }); //fine ajax
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" );
+                }
+            },
+            close: function() {
+               
+            }
+        });
+        
+        /* DIALOG AGGIUNGI CONTRATTO */
+        $("#addDialog").dialog({
+            title: "Inserisci nuovo contratto per l'utente",
+            autoOpen: false,
+            height: 250,
+            width: 500,
+            modal: true,
+            resizable: false,
+            buttons: {
+                "Salva": function() { 
+                    saveBtn(this);
+                },
+                Cancel: function() {
+                    $( this ).dialog( "close" );
+                }
+            },
+            close: function() {
+               $( this ).dialog( "close" );
+            }
+        });
+        /* FINE DIALOG AGGIUNGI CONTRATTO */
+        
+        // salvataggio aggiungi contratto
+        var saveBtn = function(elem) {             
+ 
+            if($("#contratto").val() == '-1') {
+                alert("Inserire il contratto");
+                return;
+            } else {
+                if($("#data_contratto_start").val() == '') {
+                    alert("Inserire la data inizio contratto (anno-mese-giorno)");
+                    return;
+                }
+            }
+            var cid   = $("#contratto").val()
+            // 19/05/2021
+            var bisettimanale = $("#contratto option:selected").attr('bisettimanale');
+
+            var start = $("#data_contratto_start").val();
+            var stop  = $("#data_contratto_stop").val();
+            var uid   = $("#uid").val()
+            $.ajax({
+                url: base + "/ajax/user-insert-new-contract",
+                data:{
+                    cid: cid,
+                    start: start,
+                    stop: stop,
+                    uid:uid,
+                    bisettimanale: bisettimanale
+                },
+                dataType: "json",
+                success: function(data) {
+                    if(data.success == true) {
+                        
+                        /*
+                      var rows;
+                      $.each(data.rs , function(k,v) {
+                       rows +=   "<tr><td>" + v.contratto_id + "</td><td>" + v.start + "</td></tr>";
+                      })
+                      $("#tab_storico").append(rows);
+                      */
+                     alert(data.message);
+                     $( elem ).dialog( "close" );
+                     refresh();
+                    } else if(data.success == false) {
+                        console.log(data.error)
+                        alert(data.error);
+                    }
+                },
+                error: function(e,x,t) {
+                    console.log(e);
+                    console.log(x);
+                    console.log(t);
+                    if(e.status==404) {
+                        alert(e.responseText);
+                    }
+                }
+            }); //fine ajax
+        };
+        
+        // ritorno all'elenco utenti senza salvare
+        $("#submitRet").click( function(e){
+            e.preventDefault();
+            window.location.href = "<?php echo $this->baseUrl('index.php')?>/user/list";
+        });
+        
+        $("#close").click( function() {
+            $("#stopDate_closeDialog").val('');
+            $("#closeDialog").dialog("open");
+        });
+        
+        $("#add").click( function() {
+            $("#addDialog").dialog("open");
+        });
+        
+        $("#edit").click(function(){
+            
+            var d = Dialog.init();
+            d.open("Tasto 'Modifica contratto' non ancora abilitato.");
+            
+        });
+    })
+</script>
+
+
+<h2>Riepilogo contratti: ( <?php echo $this->user->getAnagrafe() ?> )</h2>
+<div id="view-content">
+    <!-- <p>Fare una select con gli utenti</p> -->
+      
+    <?php 
+     
+       // $uc = $this->user->getActiveContract();
+    
+    $uc = $this->user->getLastInsertedContract();
+    
+        $dataInizio = null;
+        $dataFine   = null;
+        if($uc) {
+            $objstart = new Zend_Date( $uc->start, Zend_Date::ISO_8601 );
+            $objstop = 'Data di cessazione contratto non presente.';
+            if($uc->stop != null) {
+                $obj  = new Zend_Date( $uc->stop , Zend_Date::ISO_8601 );
+                $objstop  = $obj->toString('dd/MMM/yyy');
+                $dataFine = $obj->toString('yyy-MM-dd');
+            }
+            
+            $dataInizio = $objstart->toString('dd/MMM/yyy');
+            
+            $today = date('Y-m-d');
+            if( ($today > $dataFine) && ($uc->stop != null) ){
+                echo "<span style='color:red'>CONTRATTO CHIUSO</span>";
+            } else {
+                echo "<span style='color:green'>CONTRATTO APERTO</span>";
+            }
+            
+            
+            
+            echo "<p><b>Ultimo contratto inserito:</b> $uc->descrizione  </p>";
+            echo "<p><b>Data Inizio contratto:</b> " . $dataInizio . "</p>";
+            echo "<p><b>Data Cessazione contratto:</b> " . $objstop . "</p>";
+           
+        } else {
+            echo "<p><b>Nessun contratto presente!</b></p>";
+        }
+         
+          
+    ?>
+    
+    
+    <input type="submit" id="submitRet" name="submitRet" value="Torna a elenco" />
+    <input type="submit" id="edit" name="edit" value="Modifica contratto"  <?php echo $disabledClose ?> />
+    <input type="submit"  id="close" name="close" value="Chiudi contratto" <?php echo $disabledClose ?> />
+    <input type="submit"  id="add" name="add" value="Aggiungi contratto"   <?php echo $disabledAdd ?>/>
+    <input type="hidden"  id="uid" value="<?php echo $this->user->getId() ?>" />
+    <input type="hidden"  id="uc_id" value="<?php echo $uc->id ?>" />
+</div>
+<br>
+<hr size="1" />
+ 
+<h3>Storico contratti chiusi (Contratti non più attivi)</h3>
+<div id="storico">
+    <table id="tab_storico">
+        <thead>
+        <th>ID</th>
+        <th>Tipo contratto</th>
+        <th>Data Inizio</th>
+        <th>Data Fine</th>
+        </thead>
+        <tbody>
+            <?php if(count($this->old_contracts) > 0 ) { 
+                    foreach($this->old_contracts as $k => $v) {
+                        
+                        $dstart = new Zend_Date($v->start);
+                        $dstop = new Zend_Date($v->stop);
+                        // Prisma_Logger::logToFile($dstart);
+                ?>
+                <tr>
+                    <td><?php echo $v->id ?></td>
+                    <td><?php echo $v->contratto_id ?></td>
+                    <td><?php echo $dstart->toString('dd/MMM/yyy') ?></td>
+                    <td><?php echo $dstop->toString('dd/MMM/yyy')  ?></td>
+                </tr>
+            <?php } }?>
+        </tbody>
+        
+    </table>
+</div>
+
+<div id="addDialog">
+    <table>
+        <tbody>
+            <tr>
+                <td><b>Seleziona contratto</b></td> 
+                <td>
+                    <select name="contratto_id" id="contratto">
+                        <option bisettimanale="<?php echo$this->user->getContratto()->isBisettimanale() ? 1 : 0 ?>"  value="<?php echo $this->user->getContratto()->getContrattoId() ?>" >
+                            <?php echo $this->user->getContratto()->getDescrizione()?>
+                        </option>
+                        <?php foreach($this->contratti as $k=>$v) { ?>
+                        <?php if( $this->user->getContratto()->getContrattoId() == $v->contratto_id )  {continue;}?>
+                        <option bisettimanale="<?php echo $v->bisettimanale ?>"  value="<?php echo $v->contratto_id ?>"><?php echo ucfirst($v->descrizione) ?> </option>
+                        <?php } ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td><b>Data inizio contratto</b></td> 
+                <td><input type="text" class="datepicker" name="data_contratto_start" id="data_contratto_start" value=""/></td>
+            </tr>
+            <tr>
+                <td><b>Data fine contratto</b></td> 
+                <td><input type="text" class="datepicker" name="data_contratto_stop" id="data_contratto_stop" value=""/></td>
+            </tr>
+        </tbody>
+    </table>
+   
+</div>
+
+
+<div id="closeDialog">
+    <p><label>Inserire la data di fine contratto</label></p>
+    <p><input type="text" name="stop" class="datepicker" id="stopDate_closeDialog" value="" readonly/></p>
+    <input type="hidden" name="start" id="startDate_closeDialog" value="<?php echo $objstart->toString('yyy-MM-dd') ?>" />
+</div>
+
+
+
+ 

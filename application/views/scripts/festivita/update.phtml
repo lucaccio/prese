@@ -1,0 +1,148 @@
+<?php
+
+ 
+ $mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+
+ $tipofeste = array(
+                    "1"=>"Nazionale",
+                    "2"=>"Infrasettimanale",
+                    "3"=>"Patrono"
+                )
+ 
+ 
+?>
+<h3>Modifica festivit&agrave;</h3>
+
+<form action="" method="POST">
+    
+    <table>
+        <tr>
+            <td>Descrizione</td>
+             <td><input type ="text" name="descrizione" value="<?php echo $this->festa->getDescrizione() ?>" /></td>
+        </tr>
+        <tr>
+            <td>Giorno</td>
+            <td>
+                
+             <select name="giorno">
+                 <option value="<?php echo $this->festa->getGiorno() ?>"><?php echo $this->festa->getGiorno() ?></option>
+             <?php for($i=1 ; $i<=31; $i++) { ?>
+                    <option value="<?php echo $i ?>"><?php echo $i ?></option>
+                    <?php } ?>
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Mese</td>
+            <td>
+            <select name="mese">
+                <option value="<?php echo $this->festa->getMese() ?>"><?php echo $mesi[$this->festa->getMese()] ?></option>
+                 <?php 
+                 unset($mesi[$this->festa->getMese()]);
+                 foreach($mesi as $k => $v) { ?>
+                    <option value="<?php echo $k ?>"><?php echo $v ?></option>
+                    <?php } ?>
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Festivit&agrave;</td>
+            <td>
+            <select name="festa">
+               
+                
+                <?php 
+                     if($this->festa->getNazionale() == 1) {
+                         $f = 1;
+                     }elseif($this->festa->getInfrasettimanale() == 1) {
+                         $f = 2;
+                     }elseif($this->festa->getPatrono() == 1) {
+                         $f = 3;
+                     }
+                ?>
+                 <option value="<?php echo $f ?>"><?php echo $tipofeste[$f] ?></option>
+                 <?php
+                    unset($tipofeste[$f]);
+                    foreach ($tipofeste as $k => $v) { 
+                 ?>
+                 <option value="<?php echo $k ?>"><?php echo $v ?></option>
+                 <?php } ?>
+                 
+                 
+            </select>
+        </td>
+        </td>
+        </tr>
+      
+        <tr>
+            <td>Sede</td>
+             <td> 
+                 <select name="sede_id">
+                     <option value="<?php echo $this->festa->getSedeId() ?>">
+                         <?php 
+                            if( $this->festa->getSedeId() == 0 ) {
+                                echo 'Festa per tutte le sedi';
+                            } else {
+                                echo $this->sede( $this->festa->getSedeId() ) ;
+                                                   
+                            }
+                         ?>
+                     </option>
+                     <?php foreach($this->sedi as $k => $v) { ?>
+                     
+                     
+                     
+                    <option value="<?php echo $v['sede_id'] ?>"><?php echo ucfirst($v['citta']) ?></option>
+                     <?php } ?>
+                 </select>
+             </td>
+        </tr>
+        
+        <tr>
+            <td>Lavorativo</td>
+             <td> 
+                 <select name="lavorativo">
+                     
+                     <?php 
+                        if($this->festa->getLavorativo() == 0) {
+                            echo "<option value=\"0\">Non lavorativo</option>";
+                            echo "<option value=\"1\">Lavorativo</option> ";
+                        } else {
+                             echo "<option value=\"1\">Lavorativo</option> ";
+                            echo "<option value=\"0\">Non lavorativo</option>";
+                        }
+                      
+                     ?>
+                     
+                     
+                     
+                     
+                 </select>
+             </td>
+        </tr>
+        
+        
+        
+    </table>
+    <br>
+    <input type="hidden" name="festivita_id" value="<?php echo $this->festa->getId() ?>" />
+     
+    <input type="submit" name="submit" value="Aggiorna" />
+    
+    
+    
+</form>

@@ -1,0 +1,138 @@
+<style>
+ .CSSTableGenerator {
+	margin:0px;padding:0px;
+	width:40%;
+	border:1px solid #000000;
+	
+	-moz-border-radius-bottomleft:0px;
+	-webkit-border-bottom-left-radius:0px;
+	border-bottom-left-radius:0px;
+	
+	-moz-border-radius-bottomright:0px;
+	-webkit-border-bottom-right-radius:0px;
+	border-bottom-right-radius:0px;
+	
+	-moz-border-radius-topright:0px;
+	-webkit-border-top-right-radius:0px;
+	border-top-right-radius:0px;
+	
+	-moz-border-radius-topleft:0px;
+	-webkit-border-top-left-radius:0px;
+	border-top-left-radius:0px;
+}.CSSTableGenerator table{
+    border-collapse: collapse;
+        border-spacing: 0;
+	width:100%;
+	height:100%;
+	margin:0px;padding:0px;
+}.CSSTableGenerator tr:last-child td:last-child {
+	-moz-border-radius-bottomright:0px;
+	-webkit-border-bottom-right-radius:0px;
+	border-bottom-right-radius:0px;
+}
+.CSSTableGenerator table tr:first-child td:first-child {
+	-moz-border-radius-topleft:0px;
+	-webkit-border-top-left-radius:0px;
+	border-top-left-radius:0px;
+}
+.CSSTableGenerator table tr:first-child td:last-child {
+	-moz-border-radius-topright:0px;
+	-webkit-border-top-right-radius:0px;
+	border-top-right-radius:0px;
+}.CSSTableGenerator tr:last-child td:first-child{
+	-moz-border-radius-bottomleft:0px;
+	-webkit-border-bottom-left-radius:0px;
+	border-bottom-left-radius:0px;
+}.CSSTableGenerator tr:hover td{
+	
+}
+.CSSTableGenerator tr:nth-child(odd){ background-color:#edebea; }
+.CSSTableGenerator tr:nth-child(even)    { background-color:#ffffff; }.CSSTableGenerator td{
+	vertical-align:middle;
+	
+	
+	border:1px solid #000000;
+	border-width:0px 1px 1px 0px;
+	text-align:left;
+	padding:7px;
+	font-size:12px;
+	font-family:Arial;
+	font-weight:normal;
+	color:#000000;
+}.CSSTableGenerator tr:last-child td{
+	border-width:0px 1px 0px 0px;
+}.CSSTableGenerator tr td:last-child{
+	border-width:0px 0px 1px 0px;
+}.CSSTableGenerator tr:last-child td:last-child{
+	border-width:0px 0px 0px 0px;
+}
+.CSSTableGenerator tr:first-child td{
+		background:-o-linear-gradient(bottom, #47392c 5%, #47392c 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #47392c), color-stop(1, #47392c) );
+	background:-moz-linear-gradient( center top, #47392c 5%, #47392c 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#47392c", endColorstr="#47392c");	background: -o-linear-gradient(top,#47392c,47392c);
+
+	background-color:#47392c;
+	border:0px solid #000000;
+	text-align:center;
+	border-width:0px 0px 1px 1px;
+	font-size:12px;
+	font-family:Arial;
+	font-weight:bold;
+	color:#ffffff;
+}
+.CSSTableGenerator tr:first-child:hover td{
+	background:-o-linear-gradient(bottom, #47392c 5%, #47392c 100%);	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #47392c), color-stop(1, #47392c) );
+	background:-moz-linear-gradient( center top, #47392c 5%, #47392c 100% );
+	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr="#47392c", endColorstr="#47392c");	background: -o-linear-gradient(top,#47392c,47392c);
+
+	background-color:#47392c;
+}
+.CSSTableGenerator tr:first-child td:first-child{
+	border-width:0px 0px 1px 0px;
+}
+.CSSTableGenerator tr:first-child td:last-child{
+	border-width:0px 0px 1px 1px;
+}
+</style>
+ 
+<h2>Totale giorni assenze utilizzati</h2>
+<div id="view-content">
+    <form action="" method="POST">
+    <p>
+       Assenza <select name="tid">
+           <?php 
+           if($this->tid) { ?>
+              <option value="<?php echo $this->tid ?>"><?php echo $this->tipologia($this->tid) ?></option> 
+          <?php } ?>
+           <?php foreach($this->types as $k => $v) { ?>
+              <?php if($this->tid == $v->getId()) continue;   ?>
+           <option value="<?php echo $v->getId()?>"><?php echo $v->getDescrizione() ?></option>
+           <?php } ?>
+       </select>
+       <input type="submit" name="submit" value="cerca" />
+   </p> 
+   
+    </form>
+    <div class="CSSTableGenerator" >
+	<table>
+           
+               <tr> 
+                   <td>Dipendente</td>  
+                <td>2012</td> 
+                <td>2013</td> 
+                 <td>2014</td></tr>
+            
+            
+                <?php  foreach($this->arr as $k => $v) { ?>
+                    <tr>
+                        <td><?php echo $v['user'] ?></td>
+                        <td><?php echo $v['2012'] ?></td>
+                        <td><?php echo $v['2013'] ?></td>
+                        <td><?php echo $v['2014'] ?></td>
+                    </tr>
+                <?php  } ?>
+                 
+            
+        </table>
+    </div>
+</div>

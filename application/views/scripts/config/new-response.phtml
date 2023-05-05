@@ -1,0 +1,38 @@
+<hr size="1" /> 
+<h2>Impostazione risposte standard</h2>
+<p>Permette di impostare le risposte standard da inserire nelle email di rifiuto</p>
+
+<div id="view-content">
+    <br />
+    <form action="" method="post">
+        <table>
+            <tr>
+                <td><label>Inserire nuova risposta</label></td>
+                <td>
+                    <input type="text" name="description" size="40px"/>
+                    <input type="submit" name="submit" value="Salva" />
+                </td>
+            </tr>
+        </table>
+    </form>
+    
+    <h4>Elenco risposte standard presenti</h4>
+    <table>
+        <thead align="left">
+        <th width="40px">Id</th>
+        <th>Descrizione</th>
+        </thead>
+        <tbody>
+            <?php if( isset($this->all) ) :?>
+            
+            <?php foreach($this->all as $k => $v) : ?>
+            <tr>
+                <td><?php echo $v->id ?></td>
+                <td><?php echo $v->description ?></td>
+                <td> <a href="<?php echo $this->baseUrl('index.php') ?>/config/delete-response/id/<?php echo $v->id ?>">Elimina</a></td>
+            </tr>
+            <?php endforeach;?>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>

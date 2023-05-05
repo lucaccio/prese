@@ -1,0 +1,91 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+$mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+?>
+
+<script>
+  $(function(){  
+        $("#sostituzioni").chromatable({
+                  width: "100%", 
+		height: "auto" ,
+                scrolling: "yes"
+	});
+
+        $("SELECT").selectBox(); 
+
+  });
+</script>
+<h3>Elenco Sostituzioni</h3>
+ 
+<form action="" method="post" >
+    
+   
+    
+    <select name="month">
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php for($i = 1; $i <= 12   ; $i++) { 
+            if($i == $this->month) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $mesi[$i] ?></option>
+        <?php } ?>
+    </select> 
+    
+    <select name="year">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option> 
+        <?php for($i = 2007; $i<=date('Y') + 1 ; $i++) { 
+            if($i == $this->year) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $i ?></option>
+        <?php } ?>
+    </select>
+      
+    <input type="submit" name="submit" value="Cerca" />
+     
+</form>
+
+<p></p>
+
+
+
+<table width="auto" cellspacing="10px" id="sostituzioni">
+    <thead align="left">
+        <th>Sostituzione N°</th>
+        <th>Assenza N°</th>
+        <th>Sostituto</th>
+        <th>Sede</th>
+        <th>Dal</th>
+        <th>Al</th>
+        <th>Azioni</th>
+    </thead>
+    <tbody>
+<?php 
+
+if($this->list) { 
+    foreach($this->list as $k => $sostituzione) { ?>
+         
+       <tr>
+           <td><?php echo $sostituzione->getId()?></td>
+           <td><?php echo $sostituzione->getAssenza()->getAssenzaId() ?></td>
+           <td><?php echo $sostituzione->getSostituto()->getAnagrafe() ?></td>
+           <td><?php echo $sostituzione->getUser()->getSede()->getCitta() ?></td>
+           <td><?php echo $this->formatDate($sostituzione->getAssenza()->getDateStart()) ?></td>
+           <td><?php echo $this->formatDate($sostituzione->getAssenza()->getDateStop()) ?></td>
+           <td><a href="<?php echo $this->baseUrl('index.php')?>/budget/list/id/<?php echo $sostituzione->getId()?>">Budget</a></td>
+       </tr>
+       
+<?php } }?>
+    </tbody> 
+</table>

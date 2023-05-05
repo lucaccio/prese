@@ -1,0 +1,31 @@
+ <script>
+    $(function() {
+		
+           $( "#data" ).datepicker({dateFormat: "MM-yy"} );
+          
+	});
+</script>
+<h3>
+    Seleziona il periodo di stampa
+</h3>
+
+<form action="<?php echo $this->baseUrl('index.php')?>/pdf/print/" method="POST">
+    <table border="0">
+        
+        <tr>
+            <td>Periodo</td>
+            <td><input type="test" id="data" name="data" /></td>
+        </tr>
+        
+         <tr>
+            <td valign="top">Annotazioni</td>
+            <td><textarea name="note" rows="10" cols="40"></textarea></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>nelle annotazioni  scrivere \r per andare a capo</td>
+        </tr>
+        
+    </table>
+    <input type="submit" name="submit" value="Stampa" />
+</form>

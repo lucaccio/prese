@@ -1,0 +1,345 @@
+ <style type="text/css">
+    .center_main_form {
+        margin: auto;
+        width: 55%;
+        padding: 10px;
+        padding-top:40px;
+            
+    }
+
+    .h2_title_add_request {
+        margin:0px;
+        padding :20px;
+        margin-bottom: 15px; 
+        border-bottom:1px solid lightgrey;
+        font-weight:normal; 
+    }
+
+ </style>
+
+ <script>
+     var url = "<?php echo $this->baseUrl('index.php') ?>";
+     $(function() {
+         function noSundays(date) {
+             return [date.getDay() != 0, ''];
+         }
+         $(".tdQta").hide();
+         $("#quantita").prop('readonly', true);
+
+
+         $("#dateStart").datepicker({
+             beforeShowDay: noSundays,
+             defaultDate: "+1w",
+             changeMonth: true,
+             numberOfMonths: 2,
+             dateFormat: "dd-mm-yy",
+             onClose: function(selectedDate) {
+                 $("#dateStop").datepicker("option", "minDate", selectedDate);
+             }
+         });
+
+         $("#dateStop").datepicker({
+             beforeShowDay: noSundays,
+             defaultDate: "+1w",
+             changeMonth: true,
+             numberOfMonths: 2,
+             dateFormat: "dd-mm-yy",
+             onClose: function(selectedDate) {
+                 $("#dateStart").datepicker("option", "maxDate", selectedDate);
+             }
+         });
+
+
+
+         
+
+
+         $("#month_select").change(function() {
+             m = $(this).attr('value');
+             window.location.href = url + '/richieste/add/month_select/' + m;
+
+         });
+
+         $("#tipo").change(function() {
+             $(".tdQta").hide();
+             $("#quantita").prop('readonly', true);
+             // disattivo le domenica nel calendario
+             $("#dateStart").datepicker('option', 'beforeShowDay', noSundays);
+             $("#dateStop").datepicker('option', 'beforeShowDay', noSundays);
+             var id = m = $(this).attr('value');
+             var isoraria    = $('option:selected', this).attr('is_oraria');
+             
+              $("#isOraria").val(0);
+             
+               
+
+ 
+             if (id == 1 || id == 3 || id == 18) {
+                 //mostro le domeniche nel calendario per gli id di tipologia assenze
+                 $("#dateStart").datepicker('option', 'beforeShowDay', false);
+                 $("#dateStop").datepicker('option', 'beforeShowDay', false);
+             }
+            if(isoraria == 1) { 
+                $(".tdQta").show();
+                 $("#quantita").prop('readonly', false);
+                 $("#isOraria").val(1);
+            }
+
+         });
+
+
+
+
+         $("input[type=submit]").click( function(e){
+            var base = "<?php echo $this->baseUrl('index.php') ?>";
+            e.preventDefault();
+         
+            $.ajax({
+                url: url + '/richieste/add',
+                type: 'post',
+                dataType: 'json',
+                data_old: {
+                    start: $("#dateStart").val(),
+                    stop: $("#dateStop").val(),
+                    tipologia_id: $("#tipo").val(),
+                },
+                data: $("#myform").serialize(),
+                success: function(data) {
+                    if(data.success==false) {
+                           
+                        $( "#dialog" ).find( "div" ).empty();
+                         $( "#dialog" ).find( "div" ).append("<p>Attenzione: "  + data.message + "</p>");
+                         $( "#dialog" ).dialog({ 
+                             width:400,       
+                           // height:300,             
+                               modal: true,
+                               resizable: false,
+                               closeOnEscape: false,
+                               open: function(event, ui) {
+                                     $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
+                                },
+                                buttons: [{
+                                    text: "OK",
+                                    icon: "ui-icon-heart",
+                                    click: function() {
+                                        $( this ).dialog( "close" );                                                                            
+                                    }} 
+                                ]
+                          });   
+                         return;
+                    }
+                       
+                        $( "#dialog" ).find( "div" ).append("<p style='padding:5px;color:black;font-size:14px;background-color:white'>" + data.message + "</p>");
+                        
+                        $( "#dialog" ).dialog({ 
+                             width:400,       
+                           // height:300,             
+                               modal: true,
+                               resizable: false,
+                               closeOnEscape: false,
+                               open: function(event, ui) {
+                                     $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
+                                },
+                                buttons: [{
+                                    text: "Nuova richiesta",
+                                    icon: "ui-icon-heart",
+                                    click: function() {
+                                        $( this ).dialog( "close" ); 
+                                        var base = "<?php echo $this->baseUrl('index.php') ?>";
+                                        var url = base + "/richieste/add";
+                                        $(location).attr('href', url);                                        
+                                    }},{
+                                    text: "Visualizza elenco richieste",
+                                    icon: "ui-icon-heart",
+                                    click: function() {
+                                        $( this ).dialog( "close" );
+                                        var base = "<?php echo $this->baseUrl('index.php') ?>";
+                                        var url = base + "/richieste/list";
+                                        $(location).attr('href', url);
+                                    }}
+                                ]
+                          });   
+                          /*
+                        if(data.success == true) {
+                            var base = "<?php echo $this->baseUrl('index.php') ?>";
+                            var url = base + "/richieste/list";
+                            $(location).attr('href', url);
+                        }
+*/
+                        }
+                });
+         });
+
+
+
+     }); //fine function
+ </script>
+
+ 
+<div id="dialog" title="Feriemanager - Nuovo inserimento"> 
+    <div></div> 
+</div>
+
+
+
+
+
+<div class="center_main_form">
+
+<div style="border-style: outset;">
+<h2 class="h2_title_add_request">Nuovo inserimento assenza</h2>
+
+
+<div style="padding:20px;margin-bottom:10px;">
+
+ <form id="myform" action="" method="post">
+     <table>
+         <tr>
+             <td>Utente:</td>
+             <td>
+                 <select name="user_id">
+                     <option value="">Seleziona utente</option>
+                     <?php foreach ($this->users as $k => $user) { ?>
+                         <option value="<?php echo $user->getId() ?>"><?php echo $user->getAnagrafe(false) ?></option>
+                     <?php } ?>
+                 </select>
+             </td>
+
+             <td>Tipo:</td>
+             <td>
+                 <select id="tipo" name="tipologia_id">
+                     <option is_oraria="false"  value="">Seleziona tipo</option>
+                     <?php
+                        foreach ($this->tipologie as $tipo) {
+                            $hidden = '';
+                            if ($tipo->isHidden() == true) {
+                                $hidden = ' [admin]';
+                            }
+                        ?>
+                         <option is_oraria="<?php echo $tipo->isAssenzaOraria() ?>" value="<?php echo $tipo->getId() ?>"><?php echo '[' . $tipo->getSigla() . '] ' . $tipo->getDescrizioneAdmin() .  $hidden ?></option>
+                     <?php } ?>
+                 </select>
+             </td>
+
+             <td class="tdQta"><span> Num.ore </span><input id="quantita" name="quantita" type="number" min="0.5" max="8" step="0.5" value="3" /></td>
+         </tr>
+         <tr>
+
+             <td>Data Inizio: </td>
+             <td><input type="text" name="start" id="dateStart" autocomplete="off"></td>
+
+             <td>Data Fine: </td>
+             <td><input type="text" name="stop" id="dateStop" autocomplete="off" /></td>
+
+         </tr>
+         <tr>
+            <td><input type="hidden" id="isOraria" name="is_oraria"  ></td>
+            
+         </tr>
+<tr><td><input type="submit" id="salva" value="Salva" name="submit" /></td></tr>
+
+
+     </table>
+ </form>
+ </div>
+ </div>
+
+ <?php
+    if (isset($this->messages)) {
+
+        foreach ($this->messages as $message) {
+            echo $message . "<br/>";
+        }
+    }
+    ?>
+
+ <br>
+ <?php
+    $range = $this->range;
+    $now   = $this->now;
+    $f = 'yyyy-MM-dd';
+    ?>
+ <div style="border-style: outset; padding:20px ">    
+ <table border="1" width="100%";>
+     <thead>
+         <th>
+             <select name="month_select" id="month_select">
+                 <option value="<?php echo $now->get(Zend_Date::MONTH) ?>"><?php echo ucfirst($now->get(Zend_Date::MONTH_NAME)) ?></option>
+                 <?php
+                    $mese  = new Zend_Date();
+                    for ($i = 1; $i <= 12; $i++) {
+
+                        if ($i == $now->get(Zend_Date::MONTH_SHORT)) {
+                            continue;
+                        }
+                    ?>
+
+                     <option value="<?php echo $i ?>"><?php echo ucfirst($mese->set($i, Zend_Date::MONTH)->toString('MMMM')) ?></option>
+                 <?php } ?>
+             </select>
+         </th>
+
+         <?php
+
+            $last = $now->get(Zend_Date::MONTH_DAYS);
+            $now->set(1, Zend_Date::DAY);
+            for ($i = 1; $i <= $last; $i++) {
+                if ($i < 10) {
+                    $i = '0' . $i;
+                }
+                $now->set($i, Zend_Date::DAY);
+                $domenica = $now->get(Zend_Date::WEEKDAY_DIGIT);
+
+                $ora = date('Y-m-d');
+
+                if ($ora == $now->toString($f)) {
+                    echo "<th  align='center'  style='background-color:green; color: white;'>$i</th>";
+                } elseif (0 == $domenica) {
+                    echo "<th  align='center' style='color:red'>$i</th>";
+                } else {
+                    echo "<th  align='center' >$i</th>";
+                }
+            }
+
+            foreach ($this->sostituti as $k => $user) {
+                $uid = $user->getId();
+
+                echo "<tr align='center'>";
+                echo "<td>" . $user->getAnagrafe() . "</td>";
+                for ($i = 1; $i <= $last; $i++) {
+                    $now->set($i, Zend_Date::DAY);
+
+                    $d = $now->toString($f);
+                    #print_r($range);
+                    $dayArr = $range[$d];
+
+                    if (array_key_exists($uid, $dayArr)) {
+
+                        $tipo = $dayArr[$uid];
+                        if ($tipo == PERMESSO_MATTINA) {
+                            echo "<td valign='top'> 
+                         <div style='height:auto; border-top-style:solid; border-top-color:red; border-top-width:9px'></div>
+                          
+                        </td>";
+                        } elseif ($tipo == PERMESSO_SERA) {
+                            echo "<td valign='bottom'> 
+                         <div style='height:auto; border-bottom-style:solid; border-bottom-color:red; border-bottom-width:9px'></div>
+                          
+                        </td>";
+                        } else {
+                            echo "<td style='background-color:red'>  </td>";
+                        }
+                    } else {
+                        echo "<td>  </td>";
+                    }
+                }
+                echo "</tr>";
+                //  print_r($range['2013-07-22']);
+            }
+            ?>
+     </thead>
+ </table>
+
+ </div>
+
+ </div>

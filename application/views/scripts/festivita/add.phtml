@@ -1,0 +1,101 @@
+<?php
+
+ 
+ $mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+
+?>
+<h3>Inserire nuova festivit&agrave;</h3>
+
+<form action="" method="POST">
+    
+    <table>
+        <tr>
+            <td>Descrizione</td>
+             <td><input type ="text" name="descrizione" value="" /></td>
+        </tr>
+        <tr>
+            <td>Giorno</td>
+            <td>
+                
+             <select name="giorno">
+                 <option value="0">  Seleziona giorno  </option>
+             <?php for($i=1 ; $i<=31; $i++) { ?>
+                    <option value="<?php echo $i ?>"><?php echo $i ?></option>
+                    <?php } ?>
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Mese</td>
+            <td>
+            <select name="mese">
+                <option value="0">  Seleziona mese  </option>
+                 <?php foreach($mesi as $k => $v) { ?>
+                    <option value="<?php echo $k ?>"><?php echo $v ?></option>
+                    <?php } ?>
+            </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Festivit&agrave;</td>
+            <td>
+            <select name="festa">
+                <option value="0">Seleziona festivit&agrave;</option>
+                <option value="1">Nazionale</option>
+                <option value="2">Infrasettimanale</option>
+                <option value="3">Patrono</option>
+            </select>
+        </td>
+        </td>
+        </tr>
+      
+        <tr>
+            <td>Sede</td>
+             <td> 
+                 <select name="sede_id">
+                     <option value="0">  Seleziona sede  </option>
+                     <?php foreach($this->sedi as $k => $v) { ?>
+                     
+                     
+                     
+                    <option value="<?php echo $v['sede_id'] ?>"><?php echo ucfirst($v['citta']) ?></option>
+                     <?php } ?>
+                 </select>
+             </td>
+        </tr>
+        
+        <tr>
+            <td>Lavorativo</td>
+             <td> 
+                 <select name="lavorativo">
+                     <option value="0">Non lavorativo</option>
+                     <option value="1">Lavorativo</option> 
+                      
+                 </select>
+             </td>
+        </tr>
+        
+        
+        
+    </table>
+    <br>
+    <input type="hidden" name="token" value="<?php echo $this->token?>" />
+    <input type="submit" name="submit" value="Salva" />
+    
+    
+    
+</form>

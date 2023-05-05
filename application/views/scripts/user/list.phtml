@@ -1,0 +1,126 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+
+<script>
+  $(function(){  
+        $("#listautenti").chromatable({
+                width: "100%", 
+		height: "auto" ,
+                scrolling: "yes"
+	});	
+        
+       $("SELECT").selectBox(); 
+         $( "input[type=submit]" )
+            .button()
+            .click(function( event ) {}); 
+        
+        
+        
+        
+  });
+</script>
+<style type="text/css">
+    .pari{
+        
+    }
+    .dispari{
+        background-color:whitesmoke;
+    }
+</style>
+
+<h3>Elenco Utenti</h3>
+ 
+<form action="" method="POST">
+    <select name="active">
+    <?php
+        $values = array(
+            '' => 'Tutti gli utenti',
+            '1' => 'Utenti Attivi',
+            '0' => 'Utenti Cancellati'
+        );
+        echo "<option value=\"$this->active\">".$values[$this->active]."</option>";
+        unset($values[$this->active]);
+        foreach($values as $k => $v) {
+           echo "<option value=\"$k\">".$v."</option>"; 
+        }
+    ?>
+    </select>
+    
+    <select name="level_id">
+         
+        <option value="<?php echo $this->level_id ?>"> <?php echo $this->livelli[$this->level_id] ?> </option> 
+        
+        <?php  
+            unset($this->livelli[$this->level_id]);
+            foreach($this->livelli as $k => $v) { 
+        ?>
+           <option value="<?php echo $k ?>"> <?php echo $v ?> </option> 
+        <?php } ?>
+        
+    </select>
+    
+    <input type="submit" name="submit" value="Cerca" />
+</form>
+<br>
+
+<table   id="listautenti">
+    <thead align="left" i>
+        <th>ID</th>
+        <th>Cognome</th>
+        <th>Nome</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Ruolo</th>
+        <th>Sede</th>
+        <th>Status</th>
+        
+         
+        <th>Azioni</th>
+    </thead>
+    <tbody>
+        
+    <?php
+    $i=0;
+    foreach($this->elenco as $k => $user) { 
+         ($i % 2 == 0) ? $clss = 'pari' : $clss = 'dispari';
+         $i++;
+    ?>
+    <tr class="<?php echo $clss ?>">
+        <td><?php echo $user->getId() ?></td>
+        <td><?php echo ucfirst($user->getCognome()) ?></td>
+        <td><?php echo ucfirst($user->getNome()) ?></td>
+        <td><?php echo $user->getUsername() ?></td>
+        <td><?php echo  ($user->getEmail()) ?></td>
+        <td><?php echo $user->getLevel()->getDescrizione() ?></td>
+        <td>
+            <?php 
+                $sede = $user->getSede()->getCitta();
+                if('' != $sede) 
+                    echo $sede;
+                else 
+                    echo 'NO SEDE';
+            ?>
+        </td>
+        <td><?php echo $this->activeUser($user->getActive()) ?></td>
+        
+        <td>
+            <?php if($user->getActive() == 0) { ?>
+                <a href="<?php echo $this->baseUrl('index.php')?>/user/active/user_id/<?php echo $user->getId() ?>">Attiva</a>
+            <?php } else { ?>
+                <a href="<?php echo $this->baseUrl('index.php')?>/user/delete/user_id/<?php echo $user->getId() ?>">Disattiva</a>
+            <?php } ?>
+            | 
+            <a href="<?php echo $this->baseUrl('index.php')?>/user/view/user_id/<?php echo $user->getId() ?>">Dati personali</a> 
+            | 
+            <a href="<?php echo $this->baseUrl('index.php')?>/residui/update/user_id/<?php echo $user->getId() ?>">Modifica Residui</a>
+            |
+            <a href="<?php echo $this->baseUrl('index.php')?>/user/contratto/user_id/<?php echo $user->getId() ?>">Contratto</a> 
+ 
+          </td>
+    </tr>
+    
+    <?php } ?>
+    </tbody>
+</table>

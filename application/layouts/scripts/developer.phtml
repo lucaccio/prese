@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+<head>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<style>
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+</style>
+</head>
+    <body>
+         <?php 
+        if(Zend_Auth::getInstance()->hasIdentity()) {
+            $identity =  Zend_Auth::getInstance()->getIdentity() ;
+            $level = new Application_Model_LevelMapper();
+            $role = $level->findByLevelId($identity->level_id)->descrizione;
+            $this->identity_num = $identity->user_id;
+            $top = '<span class=\'identity\'>[ User: ' . $role . ' ] ' . $identity->nome . ' ' . $identity->cognome  ;
+            $menubar = strtolower($role);
+            $menu = $this->navigation()->menu()->renderMenu( $this->layout()->$menubar ); 
+        } else {
+            $top = null;
+            $menu = null;
+        }
+        ?>
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="<?php echo $this->baseUrl('index.php') ?>/index">Gestione assenze</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Richieste</a></li>
+            <li><a href="#about">Utenti</a></li>
+            <li><a href="#contact">Calendario</a></li>
+            <li><a href="#contact">Configurazione</a></li>
+          </ul>
+             <ul class="nav navbar-nav navbar-right">
+                 <li> <a><?php echo $top; ?> </a> </li>
+            
+            <li><a href="<?php echo $this->baseUrl('index.php') ?>/auth/logout">Esci</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="starter-template">
+        <!--<h1>Gestionale assenze</h1>
+        <p class="lead">prova.<br> 123.</p> -->
+        <?php echo $this->layout()->content ; ?> 
+      </div>
+
+    </div><!-- /.container -->    
+        
+        
+        
+    
+    </body>
+</html>

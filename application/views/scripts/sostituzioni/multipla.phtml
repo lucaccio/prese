@@ -1,0 +1,33 @@
+
+<h3>Modifica sostituzione n. <?php echo $this->sid?></h3>
+<p><b>Al termine della procedura i sostituti saranno informati tramite email in modo automatico</b></p>
+<p><b><span  style="color:red">Attenzione</span>...eventuali budget precedentemente assegnati a questa sostituzione verranno cancellati</b></p>
+<?php
+
+    $days = $this->values;
+    $sostituto = $this->attuale; 
+    $form = '';
+    foreach($days as $day => $users) {
+        $form.= "<input type=\"text\" name=\"day[]\" value=\"" . Application_Service_Tools::convertDataUsToIt($day) . "\" readonly/>";
+        $form.=  "<select name=\"sostituto[]\">";
+        $form.=  "<option value='" . $sostituto->getId() . "'>" . $sostituto->getCognome() . ' ' . $sostituto->getNome() ."</option>";
+        foreach($users as $k => $user) {
+            $form.=  "<option value='" . $user->user_id . "'>" . $user->cognome . ' ' . $user->nome . "</option>";
+        }
+        $form.=  "<option value='0'>Nessun sostituto</option>";
+        $form.= "</select>";
+        $form.=  "<p></p>";
+    }
+    
+   ?>
+    
+  
+<form action="" method="POST">
+    <?php echo $form ?>
+    <input type="submit" name="submit" value="Salva" />
+</form> 
+
+
+
+
+

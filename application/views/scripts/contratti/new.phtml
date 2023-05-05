@@ -1,0 +1,99 @@
+<style>
+    .iText {
+        border: 1px solid #323232; /* Bordo */
+        color: #1C1C1C; /* Colore del testo */
+        height: 30px; /* Altezza */
+        line-height: 30px; /* Altezza di riga */
+        width: 40px; /* Larghezza */
+        padding: 0 10px; /* Padding */
+    } 
+    
+    .iDesc {
+        border: 1px solid #323232; /* Bordo */
+        color: #1C1C1C; /* Colore del testo */
+        height: 30px; /* Altezza */
+        line-height: 30px; /* Altezza di riga */
+        width: 190px; /* Larghezza */
+        padding: 0 10px; /* Padding */
+    }
+</style>
+<script type="text/javascript">
+    $(function(){
+        $("#submit").click(function(e){
+            var desc = $("#descrizione_contratto").val() ;
+            desc = $.trim(desc);
+            if(desc == '') { 
+                e.preventDefault();
+                var dialog = Dialog.init();
+                dialog.open('Attenzione, inserire una descrizione per il contratto.');
+            } ;
+        });
+    });
+</script>
+<h2>Nuovo contratto</h2>
+<p>[ Permette di inserire un nuovo tipo di contratto con le ore distribuite per giorni ]</p>
+<hr size="1" />    
+<div id="view-content">
+
+    <br/> <br/>
+    <form action="" method="POST">
+    
+    <table>
+        
+        <tr>
+            <td><b>Descrizione</b></td><td colspan="2"><input id="descrizione_contratto" class="iDesc" type="text" name="descrizione" value=""</td>
+        </tr>
+
+        <tr>        
+            <td><b>Contratto bisettimanale</b></td>
+            <td><div><input type="checkbox" id="bisettimanale" name="bisettimanale" > </div>  </td>        
+        </tr>
+
+        <tr>
+            <td></td><td><strong>Mattina</strong></td><td><strong>Pomeriggio</strong></td>
+        </tr>
+        
+        <tr>
+            <td><b>Lunedì</b></td>
+                <td><input class="iText" type="text" name="mon[mattina]" value="" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="mon[sera]" value="" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Martedì</b></td>
+                <td><input class="iText" type="text" name="tue[mattina]" value="" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="tue[sera]" value="" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Mercoledì</b></td>
+                <td><input class="iText" type="text" name="wed[mattina]" value="" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="wed[sera]" value="" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Giovedì</b></td>
+                <td><input class="iText" type="text" name="thu[mattina]" value="" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="thu[sera]" value="" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Venerdì</b></td>
+                <td><input class="iText" type="text" name="fri[mattina]" value="" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="fri[sera]" value="" size="5px" maxlength="4"/></td>
+        </tr>
+        
+        <tr>
+            <td><b>Sabato</b></td>
+                <td><input class="iText" type="text" name="sat[mattina]" value="" size="5px" maxlength="4"/></td>
+                <td><input class="iText" type="text" name="sat[sera]" value="0" size="5px" maxlength="4"/></td>
+        </tr>
+        
+    </table>
+    
+    <input type="submit" name="submit" id="submit" value="Salva"/>
+    </form>
+    
+    
+    
+</div>

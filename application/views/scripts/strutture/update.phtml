@@ -1,0 +1,16 @@
+<h3>Modifica struttura ricettiva</h3>
+
+<form action="" method="POST">
+    
+    <table>
+        <tr><td>Denominazione</td><td><input type="text" name="denominazione" value="<?php echo $this->struttura->denominazione ?>" size="40px"/></td></tr>
+        <tr><td>Indirizzo</td><td><input type="text" name="indirizzo" value="<?php echo $this->struttura->indirizzo ?>" size="40px"/></td></tr>
+        <tr><td>Citt&agrave;</td><td><input type="text" name="citta" value="<?php echo $this->struttura->citta ?>" size="40px"/></td></tr>
+        <tr><td>Telefono</td><td><input type="text" name="telefono" value="<?php echo $this->struttura->telefono ?>" size="40px"/></td></tr>
+        <tr><td>Email</td><td><input type="text" name="email" value="<?php echo $this->struttura->email ?>" size="40px"/></td></tr>
+        <tr><td>Coordinate</td><td><input type="text" name="coordinate" value="<?php echo $this->struttura->coordinate ?>" size="40px"/></td></tr>
+    </table>
+    <input type="submit" name="submit" value="Aggiorna" />
+    <input type="hidden" name="token"  value="<?php echo $this->token ?>" />
+    <input type="hidden" name="struttura_id"  value="<?php echo $this->struttura->struttura_id ?>" />
+</form>

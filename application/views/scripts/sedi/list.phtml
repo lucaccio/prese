@@ -1,0 +1,45 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+
+<script>
+  $(function(){  
+        $("#sedi").chromatable({
+                  width: "auto", 
+		height: "auto" ,
+                scrolling: "yes"
+	});	
+  });
+</script>
+<h3>Elenco sedi</h3>
+<div>
+<table   id="sedi">
+    
+    <thead align="left">
+    <th width="90px">Sede Id</th>
+    <th >Città</th>
+    <th colspan="2">Azioni</th>
+    </thead>
+    
+    <tbody>
+        
+    <?php foreach($this->sedi as $k => $sede) { ?>
+    
+        <tr>
+            <td><?php echo $sede->sede_id ?></td>
+            <td><?php echo ucfirst($sede->citta) ?></td>
+            <td><a href="<?php echo $this->baseUrl('index.php')?>/sedi/view/sede_id/<?php echo $sede->sede_id ?>">Modifica</a></td>
+           <!-- <td><a href="<?php echo $this->baseUrl('index.php')?>/sedi/view/sede_id/<?php echo $sede->sede_id ?>">Gestisci feste</a></td>
+        -->
+           </tr>
+        
+        
+    <?php } ?>
+        
+        
+    </tbody>
+    
+    
+</table>
+</div>

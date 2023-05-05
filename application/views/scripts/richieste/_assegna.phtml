@@ -1,0 +1,355 @@
+<style type="text/css"> 
+.ui-datepicker
+{
+   /* z-index: 99999;*/
+   font-size: 11px;
+ 
+}
+ 
+</style>
+
+<?php
+    $situazione = array(
+         //"0" => "In lavorazione",
+         "1" => "Accettato",
+         "2" => "Accettato senza sostituto",
+        // "3" => "Rifiutato" ,
+        // "4" => "Annullato"
+    );
+?>
+<script>
+$(function() {
+       
+    var richiesta_id = <?php echo $this->richiesta->richiesta_id; ?>;
+    var utente_id    = <?php echo $this->richiesta->user_id; ?>;
+    var tipologia_id = <?php echo $this->richiesta->tipologia_id; ?>; 
+    
+    var i = 0; 
+   // var y = ['01-11-2012', '02-11-2012', '03-11-2012'];
+    
+    var popola = new Array();
+    
+    //carico gli alberghi presenti nel database
+    function loadStrutture() {
+        var base = "<?php echo $this->baseUrl('index.php') ?>";
+        $.ajax({
+            type: "POST",
+            url: base + "/strutture/load",
+            dataType: "json",
+            success: function(data) {
+                $("#strutture").empty();
+                $("#strutture").removeAttr('disabled');
+                $("#strutture").append("<option value=\"\">Seleziona</option>");
+                $.each(data, function(i, val) {
+                    $("#strutture").append("<option value=" + val.struttura_id +">" + val.denominazione + "</option>");
+                });
+            },
+            error: function() {
+                
+            }
+        })
+    }
+    
+    //cerca sostituti in base alla data selezionata
+    function cercaSostituti() {
+         
+          var start = $("#start").val();
+          if(start=='') {
+              start = "<?php echo $this->start ?>"
+              $("#start").val(start);
+          }
+          
+          
+          var stop  = $("#stop").val();
+          var u = "<?php echo $this->baseUrl('index.php') ?>";
+                    $.ajax({
+                       type: "POST",
+                       url: u + "/assenze/cerca" ,
+                       data: "&start=" + start + "&stop=" + stop,
+                       dataType : "json",
+                       success: function(data) {
+                           $("#sostituti").empty();
+                           $("#sostituti").removeAttr('disabled');
+                           $("#sostituti").append("<option value=\"\">Seleziona</option>");
+                           $.each(data, function(i, val) {
+                                $("#sostituti").append("<option value=" + val.user_id +">" + val.cognome + ' ' + val.nome + "</option>");
+                           });
+                       },
+                       error: function() {
+                           alert('errore generico');
+                       }
+                    })
+         
+    } //fine funzione cercaSostituti
+    
+    //rimuovo la riga aggiunta con ASSEGNA
+    $(".removeBtn").live('click', function(event){
+       id = $(this).parent().parent().attr('id');
+       $("#"+id).remove();
+       delete popola[id] ;
+       console.log(popola);
+    });
+    
+    
+    
+    $("#sostituti").click(function(){});
+         
+    
+    
+    //TASTO ASSEGNA
+    $("#assegna")
+        .button()
+        .click(function(event){
+            
+            var sostituto = $("#sostituti option:selected").text();
+            if(sostituto == 'Seleziona') {
+                sostituto = "Nessun Sostituto";
+            }
+            
+            var struttura = $("#strutture option:selected").text();
+            if(struttura == 'Seleziona') {
+                struttura = "Nessuna Struttura";
+            }
+            
+            
+            
+            var status = $("#status").val();
+            var statust = $("#status option:selected").text();
+            var id = $("#sostituti").val();
+            if(id == '') {
+                id = 0;
+            }
+            var start = $("#start").val();
+            var stop  = $("#stop").val(); 
+            var struttura_id = $("#strutture option:selected").val();
+           
+            
+           
+            if(status != '' && start != '' && stop != '') {
+                
+                var found = $.map(popola, function(val){
+                    if(start ) {
+                        //alert('123');
+                    }
+                });
+                
+                
+                
+                
+                utente = {
+                    richiesta: richiesta_id,
+                    utente: utente_id,
+                    sostituto: id, 
+                    tipologia: tipologia_id,
+                    inizio: start, 
+                    fine: stop,
+                    status: status,
+                    struttura_id: struttura_id                 } 
+                
+                popola [i]  = utente;
+                console.log(popola);
+                 
+                $("#table").append(
+                "<tr id=\"" + i + "\" class=\"trclass\"><td>" + $("#start").val()  + "</td><td>" + $("#stop").val()  + "</td><td>"+statust+"</td><td>" + sostituto + "</td><td>" + struttura + "</td><td><input type=\"checkbox\" id=\"checkmail\" value=\"1\"/></td><td><button class=\"removeBtn\">Rimuovi</button></td></tr>");
+                $("#start").val('');
+                $("#stop").val('');
+                $("#sostituti").val('').attr('disabled','');
+                $("#strutture").val('').attr('disabled','');
+                $("#status").val('').attr('disabled','');
+                i = i + 1 ; 
+            }
+            
+             
+            event.preventDefault();
+        });
+    
+    //radiobox per invio email
+    $("#checkmail").live('change', function(){
+        id = $(this).parent().parent().attr('id');
+        if ($(this).attr("checked") == "checked"){
+            popola[id].email = true;
+        } else {
+           popola[id].email = false; 
+        }
+        console.log(popola[id].email);
+        //console.log(popola);
+    });
+    
+    
+    
+    function customRange( input ){
+    return {
+        minDate: ( input.id == 'stop' ? jQuery('#start').datepicker('getDate') : "<?php echo $this->stop ?>"),
+        maxDate: ( input.id == 'start' ? jQuery('#stop').datepicker('getDate') : "<?php echo $this->stop ?>" )
+    }} 
+    
+    function noSunday(date){
+       var day = date.getDay();
+       return [(day > 0), ''];
+    };
+ 
+     
+
+    $("#start").datepicker({ 
+        dateFormat: "dd-mm-yy",
+        beforeShowDay: noSunday,
+        //gotoCurrent: true,
+        //beforeShow: customRange,
+        minDate: "<?php echo $this->start ?>",
+        maxDate: "<?php echo $this->stop ?>"
+    });
+    
+    
+    
+    
+    $("#stop").datepicker({ 
+        dateFormat: "dd-mm-yy",
+        beforeShowDay: noSunday,
+        //gotoCurrent: true,
+       // beforeShow: customRange,
+        minDate: "<?php echo $this->start ?>", 
+        maxDate: "<?php echo $this->stop ?>",
+        onSelect: function() {
+           $("#status").attr('disabled', false) 
+            //cercaSostituti();
+        }
+        
+    });
+    
+    //EVENTO CHANGE per la select dello status (accettato/non accettato)
+    $("#status").change(function(){
+        id = $(this).val();
+        if(id == 1) {
+            cercaSostituti();
+            loadStrutture();
+            $("#strutture").attr('disabled', false) 
+        } else {
+            $("#sostituti").attr('disabled','');
+            $("#sostituti").empty();
+            // $("#sostituti").removeAttr('disabled');
+            $("#sostituti").append("<option value=\"\">Seleziona</option>");
+            $("#strutture").attr('disabled', true);
+            $("#strutture").empty();
+            $("#strutture").append("<option value=\"\">Seleziona</option>");
+        }
+    })    
+    
+    
+    $("#annulla").button()
+        .click(function(){
+            var base = "<?php echo $this->baseUrl('index.php') ?>";
+            var url = base + "/richieste/list";    
+            $(location).attr('href',url);
+        })
+    
+    //TASTO SALVA ED ESCI
+    $("#salva").button()
+        .click(function(){
+            var u = "<?php echo $this->baseUrl('index.php') ?>";
+            i = 0;
+            arr = new Array();
+           //ricompongo l'array nel caso fosse necessario
+            $.each(popola, function(index, v) {
+                if(v != null) {
+                   arr[i] = v;
+                   i = i + 1
+                   console.log(arr);
+               }
+            });
+           
+           if(arr.length > 0 ){
+                $.ajax({
+                       type: "POST",
+                       url: u + "/assenze/insert" ,
+                       data: {
+                           dati: arr
+                       },
+                       dataType : "json",
+                       success: function(data) {
+                            alert('Richiesta salvata!');
+                            var base = "<?php echo $this->baseUrl('index.php') ?>";
+                            var url = base + "/richieste/list";    
+                            $(location).attr('href',url);
+                       },
+                       error: function() {
+                           alert('errore generico');
+                       }
+                 })
+           }        
+        });
+    
+    
+    
+})
+</script>
+
+
+<h3>Assegna richiesta</h3>
+ 
+
+
+<table>
+    <tr><td colspan="2"><u><?php echo $this->utente($this->richiesta->user_id) ?></u></td></tr>
+    <tr><td>Richiesta #</td><td></td></tr>
+    <tr><td>Tipologia</td><td></td></tr>
+    <tr><td>Dal</td><td></td></tr>
+    <tr><td>Al</td><td></td></tr>
+    <tr><td>Giorni</td><td></td></tr>
+    <tr><td>Ferie assegnate <?php echo date('Y') ?> </td><td><b><?php echo $this->ferie ?></b></td></tr>
+    <tr><td>Permessi assegnati <?php echo date('Y') ?> </td><td><b><?php echo $this->permessi ?></b></td></tr>
+    
+</table>
+
+<br>
+
+
+<form>
+    <label>Inizio</label>
+    <input type="text" id="start" />
+    <label>Fine</label>
+    <input type="text" id="stop" />
+     
+    <select id="status" disabled >
+        <option value="">Seleziona</option>
+        <?php foreach($situazione as $k => $v) { ?>
+        <option value=<?php echo (int)$k ?>><?php echo $v ?></option> 
+        <?php } ?>
+    </select>
+    
+    
+    <select id="sostituti" disabled >
+        <option value="">Seleziona</option>
+    </select>
+    
+    <select id="strutture" disabled >
+        <option value="">Seleziona</option>
+    </select>
+    
+    <button id="assegna">Assegna</button>
+</form>
+
+
+<div>
+   
+    <table  id="table" width="100%">
+        <thead align="left">
+            <tr>
+                <th>Dal</th>
+                <th>Al</th>
+                <th>Status</th>
+                <th>Sostituto</th>
+                <th>Alloggio</th>
+                <th>Invia Email</th>
+            </tr>
+        </thead>
+    </table>
+    <p>
+        <button id="salva">Salva ed esci</button>
+        <button id="annulla">Annulla</button>
+    </p>
+
+      
+    
+    
+</div>
+    

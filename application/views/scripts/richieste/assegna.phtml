@@ -1,0 +1,481 @@
+<style type="text/css">
+    .ui-datepicker {
+        /* z-index: 99999;*/
+        font-size: 11px;
+
+    }
+
+    .color_tipo {
+        color: red;
+    }
+</style>
+    <!-- Dialog elenco utenti assenti in gruppo -->
+    <div id="final_dialog" title="Assegnazione assenza">
+        <div></div>     
+    </div>
+<?php
+$situazione = array(
+    //"0" => "In lavorazione",
+    "1" => "Accettato",
+    "2" => "Accettato senza sostituto",
+    // "3" => "Rifiutato" ,
+    // "4" => "Annullato"
+);
+?>
+<script>
+    $(function() {
+
+        var richiesta_id = <?php echo $this->richiesta->richiesta_id; ?>;
+        var utente_id = <?php echo $this->richiesta->user_id; ?>;
+        var tipologia_id = <?php echo $this->richiesta->tipologia_id; ?>;
+
+        var i = 0;
+        // var y = ['01-11-2012', '02-11-2012', '03-11-2012'];
+
+        /* Lista di utenti */
+        var popola = new Array();
+
+        //carico gli alberghi presenti nel database
+        function loadStrutture() {
+            var base = "<?php echo $this->baseUrl('index.php') ?>";
+            $.ajax({
+                type: "POST",
+                url: base + "/strutture/load",
+                dataType: "json",
+                success: function(data) {
+                    $("#strutture").empty();
+                    $("#strutture").removeAttr('disabled');
+                    $("#strutture").append("<option value=\"\">Seleziona</option>");
+                    $.each(data, function(i, val) {
+                        $("#strutture").append("<option value=" + val.struttura_id + ">" + val.denominazione + "</option>");
+                    });
+                },
+                error: function() {
+
+                }
+            })
+        }
+
+        //cerca sostituti in base alla data selezionata
+        function cercaSostituti() {
+
+            var start = $("#start").val();
+            if (start == '') {
+                start = "<?php echo $this->start ?>"
+                $("#start").val(start);
+            }
+
+
+            var stop = $("#stop").val();
+            var tipologia_id = $("#tipologia_id").val();
+            var u = "<?php echo $this->baseUrl('index.php') ?>";
+            $.ajax({
+                type: "POST",
+                url: u + "/assenze/cerca",
+                data: "&start=" + start + "&stop=" + stop + "&tipologia_id=" + tipologia_id,
+                dataType: "json",
+                success: function(data) {
+                    $("#sostituti").empty();
+                    $("#sostituti").removeAttr('disabled');
+                    $("#sostituti").append("<option value=\"\">Seleziona</option>");
+                    $.each(data, function(i, val) {
+                        $("#sostituti").append("<option value=" + val.user_id + ">" + val.cognome + ' ' + val.nome + "</option>");
+                    });
+                },
+                error: function() {
+                    alert('errore generico');
+                }
+            })
+
+        } //fine funzione cercaSostituti
+
+        //rimuovo la riga aggiunta con ASSEGNA
+        $(".removeBtn").live('click', function(event) {
+            id = $(this).parent().parent().attr('id');
+            $("#" + id).remove();
+            delete popola[id];
+            console.log(popola);
+        });
+
+
+
+        $("#sostituti").click(function() {});
+
+
+        //TASTO ASSEGNA
+        $("#assegna")
+            .button()
+            .click(function(event) {
+
+                var sostituto = $("#sostituti option:selected").text();
+                if (sostituto == 'Seleziona') {
+                    sostituto = "Nessun Sostituto";
+                }
+
+                var struttura = $("#strutture option:selected").text();
+                if (struttura == 'Seleziona') {
+                    struttura = "Nessuna Struttura";
+                }
+
+
+
+                var status = $("#status").val();
+                var statust = $("#status option:selected").text();
+                var id = $("#sostituti").val();
+                if (id == '') {
+                    id = 0;
+                }
+                var start = $("#start").val();
+                var stop = $("#stop").val();
+                var qta = $("#quantita").val();
+
+                var struttura_id = $("#strutture option:selected").val();
+
+                var note = $("#note").val();
+
+                if (status != '' && start != '' && stop != '') {
+                    utente = {
+                        richiesta: richiesta_id,
+                        utente: utente_id,
+                        sostituto: id,
+                        tipologia: tipologia_id,
+                        inizio: start,
+                        fine: stop,
+                        qta: qta,
+                        status: status,
+                        struttura_id: struttura_id,
+                        note: note,
+                        email: true
+                    }
+
+                    popola[i] = utente;
+
+                    $("#table").append(
+                        "<tr id=\"" + i + "\" class=\"trclass\"><td>" + $("#start").val() + "</td><td>" + $("#stop").val() + "</td><td>" + statust + "</td><td>" + sostituto + "</td><td>" + struttura + "</td><td>" + note + "</td><td><input type=\"checkbox\" id=\"checkmail\" value=\"1\"  checked /></td><td><button class=\"removeBtn\">Rimuovi</button></td></tr>");
+                    $("#start").val('');
+                    $("#stop").val('');
+                    $("#sostituti").val('').attr('disabled', '');
+                    $("#strutture").val('').attr('disabled', '');
+                    $("#status").val('').attr('disabled', '');
+                    $("#note").val('').attr('disabled', '');
+                    i = i + 1;
+                }
+                event.preventDefault();
+            });
+
+        //RADIOBOX PER INVIO EMAIL
+        $("#checkmail").live('change', function() {
+            id = $(this).parent().parent().attr('id');
+            ($(this).attr("checked") == "checked") ? popola[id].email = 1: popola[id].email = 0;
+        });
+
+
+
+        function customRange(input) {
+            return {
+                minDate: (input.id == 'stop' ? jQuery('#start').datepicker('getDate') : "<?php echo $this->stop ?>"),
+                maxDate: (input.id == 'start' ? jQuery('#stop').datepicker('getDate') : "<?php echo $this->stop ?>")
+            }
+        }
+
+        function noSunday(date) {
+            var day = date.getDay();
+            return [(day > 0), ''];
+        };
+
+        function senderrormail(d) {
+            var base = "<?php echo $this->baseUrl('index.php') ?>";
+            $.ajax({
+                type: "POST",
+                url: base + "/error/send",
+                data: {
+                    dati: d
+                },
+                dataType: "html",
+                success: function() {},
+                error: function() {}
+            });
+        };
+
+
+
+
+        $("#start").datepicker({
+            dateFormat: "dd-mm-yy",
+            //beforeShowDay: noSunday,
+            //gotoCurrent: true,
+            //beforeShow: customRange,
+            minDate: "<?php echo $this->start ?>",
+            maxDate: "<?php echo $this->stop ?>"
+        });
+
+
+
+
+        $("#stop").datepicker({
+            dateFormat: "dd-mm-yy",
+            //beforeShowDay: noSunday,
+            //gotoCurrent: true,
+            // beforeShow: customRange,
+            minDate: "<?php echo $this->start ?>",
+            maxDate: "<?php echo $this->stop ?>",
+            onSelect: function() {
+                $("#status").attr('disabled', false)
+                //cercaSostituti();
+            }
+
+        });
+
+        //EVENTO CHANGE per la select dello status (accettato/non accettato)
+        $("#status").change(function() {
+            id = $(this).val();
+            if (id == 1) {
+                cercaSostituti();
+                loadStrutture();
+                $("#strutture").attr('disabled', false)
+                $("#note").attr('disabled', false)
+            } else {
+                $("#sostituti").attr('disabled', '');
+                $("#sostituti").empty();
+                // $("#sostituti").removeAttr('disabled');
+                $("#sostituti").append("<option value=\"\">Seleziona</option>");
+                $("#strutture").attr('disabled', true);
+                $("#strutture").empty();
+                $("#strutture").append("<option value=\"\">Seleziona</option>");
+            }
+        });
+
+
+        $("#annulla").button()
+            .click(function() {
+                var base = "<?php echo $this->baseUrl('index.php') ?>";
+                var url = base + "/richieste/list";
+                $(location).attr('href', url);
+            })
+
+        //TASTO SALVA ED ESCI
+        $("#salva").button()
+            .click(function() {
+                // se l'array è popolato allora disattivo il tasto per l'invio in modo da evitare doppi click e quindi inserimenti doppi
+                if (popola.length > 0) {
+                    $(this).button('disable');
+                }
+                var u = "<?php echo $this->baseUrl('index.php') ?>";
+                i = 0;
+                arr = new Array();
+                //ricompongo l'array nel caso fosse necessario
+                $.each(popola, function(index, v) {
+                    if (v != null) {
+                        arr[i] = v;
+                        i = i + 1
+                    }
+                });
+ 
+                if (arr.length > 0) {
+                    $.ajax({
+                        type: "POST",
+                        url: u + "/assenze/insert",
+                        //url: u + "/ajax/inserisci-assenza" ,
+                        data: {
+                            dati: arr
+                        },
+                        dataType: "json",
+                        success: function(response) {
+                         //   alert(response);
+                         $( "#final_dialog" ).find( "div" ).append("<p style='padding:5px;color:black;font-size:14px;background-color:white'>" + response + "</p>");
+                            $( "#final_dialog" ).dialog({
+                             //   width: 300,
+                             //   height: 120,
+                               modal: true,
+                               resizable: false,
+                               closeOnEscape: false,
+                               open: function(event, ui) { 
+                                    //hide close button.
+                                    $(this).parent().children().children('.ui-dialog-titlebar-close').hide();
+                                },
+                                buttons: [
+                                    {
+                                    text: "Ok",
+                                    icon: "ui-icon-heart",
+                                    click: function() {
+                                        $( this ).dialog( "close" );
+                                        var base = "<?php echo $this->baseUrl('index.php') ?>";
+                                        var url = base + "/richieste/list";
+                                        $(location).attr('href', url);
+                                    }
+ 
+       
+                                    }
+                                ]
+                            });   
+
+
+                            
+                        },
+                        error: function(e) {
+                            // invia email con errore
+                            senderrormail(e.responseText);
+                        }
+                    })
+                }
+            });
+
+
+
+    })
+</script>
+
+
+<h3>Assegna richiesta di tipo:
+    <span class="color_tipo"><?php
+                                if ($this->tipologia_id)
+                                    echo ucfirst($this->tipologia($this->tipologia_id))
+
+                                ?></span>
+    per
+    <span class="color_tipo"><?php
+                                if ($this->richiesta)
+                                    echo $this->utente($this->richiesta->user_id)
+
+                                ?></span>
+</h3>
+
+
+
+
+
+<table>
+    <thead>
+        <th></th>
+        <th>Assegnate</th>
+        <th>Disponibili</th>
+    </thead>
+    <?php
+    if (isset($this->residui)) {
+        foreach ($this->residui as $k => $row) { ?>
+            <tr>
+                <td><?php echo $row->tipo ?></td>
+                <td><?php echo $row->goduto ?></td>
+                <td><?php echo $row->totale ?></td>
+            </tr>
+
+
+    <?php    }
+    }
+
+    ?>
+
+</table>
+
+<br>
+<?php
+//@todo inserire visuale giorni festivi
+?>
+<p>DA IMPLEMENTARE: nella richiesta sono presenti # xyz di giorni festivi</p> -->
+
+<form>
+    <input type="hidden" id="tipologia_id" value="<?php echo $this->tipologia_id ?>" />
+    <table>
+        <tr>
+            <td>
+                <label>Inizio</label></td>
+            <td>
+                <input type="text" id="start" autocomplete="off" />
+            </td>
+        </tr>
+        <tr>
+            <td><label>Fine</label></td>
+            <td><input type="text" id="stop" autocomplete="off" /></td>
+        </tr>
+        <tr>
+            <td><label>Quantita richiesta</label></td>
+            <td><input type="text" id="quantita" readonly value="<?php echo $this->quantita; ?>" /></td>
+        </tr>
+        <!--    <tr>
+            <td><label>Quantita effettiva</label></td>
+            <td><input type="text" id="effettivi" readonly value="<?php echo $this->effettivi; ?>"  /></td>
+        </tr>-->
+
+
+        <tr>
+            <td>
+                <label>Stato</label>
+            </td>
+            <td>
+                <select id="status" disabled>
+                    <option value="">Seleziona</option>
+                    <?php foreach ($situazione as $k => $v) { ?>
+                        <option value=<?php echo (int) $k ?>><?php echo $v ?></option>
+                    <?php } ?>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Sostituto</td>
+            <td>
+                <select id="sostituti" disabled>
+                    <option value="">Seleziona</option>
+                </select>
+            </td>
+        </tr>
+
+        <tr>
+            <td>Hotel</td>
+            <td>
+                <select id="strutture" disabled>
+                    <option value="">Seleziona</option>
+                </select>
+            </td>
+        </tr>
+
+
+        <tr>
+            <td>Annotazioni</td>
+            <td>
+                <textarea id="note" disabled></textarea>
+            </td>
+
+        </tr>
+
+        <tr>
+            <td></td>
+            <td><button id="assegna">Assegna</button></td>
+        </tr>
+
+    </table>
+</form>
+
+
+<br>
+
+
+
+<div>
+
+    <table id="table" width="100%">
+        <thead align="left">
+            <tr>
+                <th>Dal</th>
+                <th>Al</th>
+                <th>Status</th>
+                <th>Sostituto</th>
+                <th>Alloggio</th>
+                <th>Annotazioni</th>
+                <th>Invia Email</th>
+            </tr>
+        </thead>
+    </table>
+    <br>
+    <p>
+        <button id="salva">Salva ed esci</button>
+        <button id="annulla">Annulla</button>
+    </p>
+
+
+
+
+
+
+
+</div>

@@ -1,0 +1,461 @@
+<?php  $this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css'); ?>
+ 
+<script type="text/javascript">  
+
+    // finestra modale che mostra un elenco di utenti 
+    // assenti per lo stesso motivo
+    function showUsers(event, users) {        
+        event.preventDefault();
+        var par;
+        
+        // rimuove ogni possibile elemento child
+        $( "#elenco_utenti" ).find( "div" ).empty();
+        users.map( utente => { 
+            
+            $( "#elenco_utenti" ).find( "div" ).append("<p   style='padding:5px;color:white;font-size:10px;background-color:grey'>" + utente + "</p>");
+            par = null
+        });
+        $( "#elenco_utenti" ).dialog({
+            width: 300,
+            height: 400,
+            modal: true
+        });            
+    }
+
+</script>
+
+<style type="text/css">
+ .assenze {
+    color:white;  
+     font-size:18px;
+     text-align:center;      
+     line-height: 100%;
+     width:100%; 
+ }
+ .inner_div {     
+    min-height: 100px;
+    padding:5%;
+    margin:5px;
+ }
+ .inner_text_sede {
+     color:white;  
+     font-size:18px;
+     text-align:center;      
+     line-height: 100%;
+     width:100%;   
+ }
+ .inner_text_descrizione {
+     color:white;  
+     font-size:16px;
+     text-align:center;      
+     line-height: 0%;
+     width:100%;   
+ }
+.standardW {
+     height: 100%;    
+     min-height: 150px;
+     border-color:#9db6d3; 
+     border-style:solid;
+     border-width: 1px;
+}
+.giorno {
+     
+     text-align:right;
+     margin: 0;
+}
+
+.testo-interno {
+    font-size: 12px;
+}
+
+ 
+.center_main_form {
+    margin: auto;
+    width: 55%;
+    padding: 10px;
+    padding-top:10px;
+   
+}
+
+.h2_title_add_request {
+    margin:0px;
+    padding :20px;
+    margin-bottom: 15px; 
+    border-bottom:1px solid lightgrey;
+    font-weight:normal; 
+    text-align:center;
+}
+ 
+
+
+
+
+
+</style>
+
+<?php
+ 
+ $mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+ 
+ 
+    $year = $this->year;
+    $prev =  $this->month - 1 ;
+    $next =   $this->month + 1 ;     
+ 
+    if($prev == 0 ) { 
+             $prevMese = 12;
+             $prevAnno = $year - 1;
+         } else {
+             $prevMese = $prev;
+             $prevAnno = $this->year;
+         }
+         
+         if($next == 13) {
+             $nextMese = 1;
+             $nextAnno = $year +1;
+         } else {
+             $nextMese = $next;
+             $nextAnno = $this->year;
+         }
+         
+  ?>
+<!-- Dialog elenco utenti assenti in gruppo -->
+<div id="elenco_utenti" title="Utenti assenti">
+  <div></div>
+</div>
+
+
+
+
+<div class="center_main_form">
+<div>
+<div style="padding:10px;margin-bottom:10px;"> 
+    <h2 class="h2_title_add_request">
+    <a class="prev" href="<?php echo $this->baseUrl('index.php')?>/calendario/mensile/anno/<?php echo $prevAnno ?>/mese/<?php echo $prevMese ?>/"><< </a> 
+    <?php echo $this->stampaMese($this->month) . ' ' . $this->year ?> 
+    <a class="next" href="<?php echo $this->baseUrl('index.php')?>/calendario/mensile/anno/<?php echo $nextAnno ?>/mese/<?php echo $nextMese ?>/"> >></a> 
+    </h2>
+ </div>
+</div>
+</div>
+
+
+<div style="margin-bottom:15px;  ">
+<form action="" method="post">    
+    <select name="post-mese">         
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php foreach($mesi as $k => $v) { ?>
+                <?php if($this->month == $k) { continue; } ?>
+                <option value="<?php echo $k ?>"><?php echo $v ?></option>
+        <?php } ?>      
+    </select>    
+    <select name="post-anno">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option>
+        <option value="<?php echo date('Y') -4 ?>"><?php echo date('Y')  - 4?></option>
+        <option value="<?php echo date('Y') -3 ?>"><?php echo date('Y')  - 3?></option>
+        <option value="<?php echo date('Y') -2 ?>"><?php echo date('Y')  - 2?></option>
+        <option value="<?php echo date('Y') -1 ?>"><?php echo date('Y')  - 1?></option>
+        <option value="<?php echo date('Y')  ?>"><?php echo date('Y')  ?></option>
+        <option value="<?php echo date('Y') +1 ?>"><?php echo date('Y') +1 ?></option>
+    </select>    
+    <input type="submit" name="submit" value="Seleziona" />    
+</form>
+
+</div>
+
+<?php
+      $color1 = '#fe3632';
+      $color2 = '#c5c31e';
+       
+       echo '<table width=\'100%\'>';
+       echo '<tbody>';
+       foreach($this->calendar->getDays() as $day) {
+            echo '<th align=\'center\'>'.$day.'</th>';
+       }
+       echo '</tbody>';
+       echo '<tr>';
+       
+       //se è domenica allora 0 diventa 7
+       $this->calendar->getFirstDay() == 0 ? $this->calendar->setFirstDay(7) : $this->calendar->getFirstDay();
+       
+        //genero i giorni del mese precedente per completare il calendario
+       $prev_days = $this->calendar->_getDays($this->calendar->getPreviousMonth()) - $this->calendar->getFirstDay() + 2 ;
+       
+       for($i = 1; $i < $this->calendar->getFirstDay(); $i++) {
+           echo '<td  style="color:#c0c0c0" width="14.25%"><div class="standardW"><p class="giorno">'.$prev_days.'</p></div</td>';
+           $prev_days++;
+       }
+       
+       
+       //okkio qui che non stampa l'evento di ogni domenica
+       for($i = 1; $i<=$this->calendar->getTotalDaysInMonth(); $i++) {
+
+           echo '<td width="14.25%"><div class="standardW"><p class="giorno">' . $i .'</p>'; 
+                     
+           if( array_key_exists( $this->calendar->formatDate($i), $this->calendar->getEvents()) ) {
+               $e = $this->calendar->getEvents();     
+               
+               /**
+                * $k == assenza | festivita | giro 
+                * $giorno == array di dati quali user e tipologia
+                */
+               foreach($e[$this->calendar->formatDate($i)]  as  $k => $giorno) {
+                
+                    if('Sostituto' == $this->role) {
+                        
+                        if($k === 'assenze') {
+                            foreach ($giorno  as $k => $v) {   
+                                    
+                                $descrizione = $this->descrizionetipo($v['tipologia_id']) ;
+                                
+                                    //echo "<p> &nbsp; </p>";
+                                if( (int)$v['user_id'] == (int)$this->id) {      
+                                    echo "<div class='inner_div' style='background-color:#2cc703;'>";                              
+                                    echo " <p class='assenze' align='center'><b>" . $descrizione. "</b></p>";                                    
+                                }  else {
+
+                                   
+                                    $sede = $this->sedeUser($v['user_id']);
+
+                                    if(!$stack_sede || $stack_sede == $sede ) {                                        
+                                        $color = $color1;
+                                    } elseif ($stack_sede != $sede) {                                        
+                                        $color = $color2;
+                                        
+                                        $color2 = $color1;
+                                        $color1 = $color;
+                                    }
+
+                                    echo "<div class='inner_div'; style='background-color:". $color . "; height:100%'>
+                                    <p class='inner_text_sede' align='center'><b> " . $sede  .   "</b></p>  
+                                    <p class='inner_text_descrizione' align='center'><b>("  . $descrizione . ")</b></p></div>";
+                                    //echo '<span class="testo-interno">Sotituisco: '. $this->utente($v['user_id']) .'</span><br>';
+                                    //echo '<span class="testo-interno">Sede:  ' . $this->sedeUser($v['user_id']) . '</span><br>';
+                                  //  echo '<span class="testo-interno">Tipo:  ' . $descrizione . '</span><br>';
+                                    $stack_sede = $sede;
+                                    //Prisma_Logger::log("sede: " . $sede);
+                                }
+                                echo "</div>";
+                            }                                
+                        }
+                    }  elseif('Operatore' == $this->role) {
+                        /*
+                        if(isset($v['giro'])) { continue; }
+                        $tipo = $v['tipologia_id'];
+                        #echo 'Assente per: ' . $this->descrizionetipo($tipo);
+                        echo  "<p align=\"left\">Assente per: <b style='color:red;'>". $this->descrizionetipo($tipo) ."</b></p>";
+                        // echo '<br>';
+                        $utente = $this->utente($v['sostituto_id']);
+                        //if("NESSUNO" != $utente) {
+                        //    echo 'Mi sostituisce '. $utente; 
+                        //}
+                        if(false !== $utente) {
+                            echo 'Mi sostituisce: ' . $this->utente($v['sostituto_id']) .'<br>'; 
+                        }
+                        */
+                    } elseif ('Amministratore' == $this->role) {   
+
+                        if($k == 'giri') {
+                        
+                            echo   '<div style="background-color:red;margin-bottom:7px; text-align: center">
+                                    <span style="color:white"><b>GIRO</b></span>
+                                    </div>' ;
+                        
+                        }
+
+                       if ($k == 'festivita') {
+                           //Zend_Debug::dump($valori);
+                           foreach ($giorno  as $key => $values) {
+                               //Zend_Debug::dump($values);
+                               $lavorativo = null;
+                            
+                               // $values['lavorativo'] ?  $lavorativo ="LAV" :   $lavorativo ="NON LAV" ;
+
+                               echo   '<div style="background-color:green;margin-bottom:7px; text-align: center">';
+                               echo '<span style="color:white"><b>' . strtoupper($values['descrizione'])  .' </b></span>';
+                          
+                               //echo '<span style="color:white"><b>' . strtoupper( $values['descrizione'] ) . ' (' . $lavorativo .')   </b></span>';
+                               echo '</div>' ;
+                           }
+                       }
+
+                       if ($k == 'assenze') {
+
+                       //print_r($giorno);
+                           //Prisma_Logger::logToFile(json_encode($giorno));
+
+                           //Prisma_Logger::logToFile(count($giorno));
+
+                            $numero_assenze_per_cella = count($giorno);
+                            $arr_tipo= null;
+                            
+                            foreach ($giorno  as $k => $v) {
+                                $tipo = $v['tipologia_id'];
+                                if(!isset( $arr_tipo[$tipo]['tot'] ) )
+                                    $arr_tipo[$tipo]['tot'] = 0;
+                                $arr_tipo[$tipo]['tot'] += 1;  
+                                $arr_tipo[$tipo]['status'] = 0; 
+
+                                // inserisco gli utenti utilizzando un helper Utente
+                                $arr_tipo[$tipo]['users'][$k] = $this->utente($v['user_id'], true);
+
+                                // ordino per cognome ascendente
+                                sort($arr_tipo[$tipo]['users']);
+
+                            }
+                            
+                           // per ogni giorno 
+                           foreach ($giorno  as $k => $v) {
+                               $tipo = $v['tipologia_id'];
+                               
+                               //$arr_tipo[$tipo] += 1;
+
+                               $t = new Application_Model_TipologiaMapper();
+                               $tipo = $t->find($tipo);
+                               if ($tipo instanceof Zend_Db_Table_Rowset) {
+                                   Prisma_Logger::logToFile("errore da sistemare");
+                                   continue;
+                               }
+
+                               $assenza_oraria = $tipo->isAssenzaOraria();
+
+                               $is_permesso = $tipo->isPermesso();
+
+
+
+                               // echo $this->ruolo($v['user_id']);
+                               // if($this->role === $this->ruolo($v['user_id']));
+                               if ($tipo->isPatrono()) {
+
+                                //@TODO controllare se lavorativo
+
+                                   $f = new Application_Model_FestivitaMapper();
+                                   $u = new Application_Model_UserMapper();
+                                   $user = $u->find($v['user_id']);
+                                   $patrono = $f->findPatronalSaint($user->getSede()->getSedeId());
+
+                                   if ($patrono->lavorativo == 1) {
+                                       $testo_patrono = "Patrono Lav.";
+                                   } else {
+                                       $testo_patrono = "Patrono Non Lav.";
+                                   }
+
+                                   // echo   '<b>▬</b>' . $this->utente($v['user_id'])
+                                   //   .' assente per PATRONO<br>';
+                                   echo '<div><b>▬</b><a href="' . $this->baseUrl('index.php') . '/user/elenco-assenze/uid/' . $v['user_id'] . '"> '
+                                    . $this->utente($v['user_id']) . '</a> (<b  style=\'color:red\'> ' . $testo_patrono . ' </b>) ';
+                               } else {
+                                   
+                                   
+
+                                   $tipo = $v['tipologia_id'];
+                                   // aggrego le tipologie simili se superiori per numero a 5
+                                   if($arr_tipo[$tipo]['tot'] > 5) {
+                                       //se questa tipologia non è stata ancora processata...
+                                       if($arr_tipo[$tipo]['status'] == 0) {
+                                            //...la processo una sola volta
+                                            $arr_tipo[$tipo]['status'] = 1;
+                                            // creo un array da usare per creare un modal in javascript
+                                            // ovvero passo un array a una funzione inline
+                                            $users = array();
+                                            
+
+                                            foreach( $arr_tipo[$tipo]['users'] as $x => $u) {
+                                                $users[]  =  trim($u);
+                                            }  
+                                            //scklerando... 
+                                            //https://stackoverflow.com/questions/32128833/how-to-pass-a-javascript-array-into-an-inline-function-call-generated-by-php
+                                            echo '<div><b>▬</b>';
+                                            echo " <a onclick=\"showUsers(event,['".implode("','",$users)."']);\" style=\"background-color: red; color: white\" href=\"#\"> ...Altri  " . $arr_tipo[$tipo]['tot'] . "</a> (<b>" . $this->descrizionetipoadmin($tipo) . "</b>) ";
+                                            echo '</div>';
+                                       }                                         
+
+                                   } else {
+                                       // visuale standard
+                                       //@update 16/04/2021
+                                       if($assenza_oraria == 1 && !$is_permesso) {
+                                            $ore =  $v['qta_in_ore'];
+                                            echo '<div><b>▬</b><a href="' . $this->baseUrl('index.php') . '/user/elenco-assenze/uid/' . $v['user_id'] . '"> ' . $this->utente($v['user_id']) . '</a> (<b>' . $this->descrizionetipoadmin($tipo) .   $ore . ' ore</b>) ';
+                                        } else {
+                                            echo '<div><b>▬</b><a href="' . $this->baseUrl('index.php') . '/user/elenco-assenze/uid/' . $v['user_id'] . '"> ' . $this->utente($v['user_id']) . '</a> (<b>' . $this->descrizionetipoadmin($tipo) .  '</b>) ';
+                                        }
+                                        if (false !== $this->utente($v['sostituto_id'])) {
+                                            echo ' sostituito\a da ' . $this->utente($v['sostituto_id']) . '<br>';
+                                        }
+                                        echo '</div>';
+                                        $assenza_oraria = 0;
+                                   }
+                                   
+                               }
+                           } //fine foreach
+                           
+                       }
+
+                    } else { // se non rientro in uno delle tipologie utente allora...
+                        $tipo = $v['tipologia_id'];
+                        
+                        echo '<div><b>▬</b><a href="' . $this->baseUrl('index.php') . '/user/elenco-assenze/uid/' . $v['user_id'] . '"> ' . $this->utente($v['user_id']) . '</a> (<b>' . $this->descrizionetipoadmin($tipo) . '</b>) ';
+                        if (false !== $this->utente($v['sostituto_id'])) {
+                            echo ' sostituito\a da ' . $this->utente($v['sostituto_id']) . '<br>';
+                        }
+                        echo '</div>';
+                    }
+                    
+                } //fine foreach
+            }//fine array key exist 
+       //} //fine for if ruoli utente
+
+                 //  }  //fine foreach
+
+             //   }
+          //   }
+       //    }
+             
+           
+           echo '</div></td>';
+           if( 0 == (int) $this->calendar->_getDay($i)) {
+              // echo '<td>'.$i.'</td></tr><tr>';
+               echo '</tr><tr>';
+               continue;
+           }
+           
+ }
+       
+       // numeri per completare il calendario
+       if( 0 != (int)$this->calendar->getLastDay() ) {
+           
+           $r = 7 - $this->calendar->getLastDay();
+           
+           for($i = 1; $i <= $r; $i++ ) {
+               echo '<td  style="color:#c0c0c0" width="14.25%"><div class="standardW"><p class="giorno">'.$i . '</p>';
+               
+               echo '</div></td>';
+           }
+           
+       }
+       
+       
+       echo '</tr>';
+       echo '</table>';
+?>
+<!--
+<h3 align="center"> 
+        <a class="prev" href="<?php echo $this->baseUrl('index.php')?>/calendario/mensile/anno/<?php echo $prevAnno ?>/mese/<?php echo $prevMese ?>/"><< </a> 
+            <?php echo $this->stampaMese($this->month) . ' ' . $this->year ?> 
+        <a class="next" href="<?php echo $this->baseUrl('index.php')?>/calendario/mensile/anno/<?php echo $nextAnno ?>/mese/<?php echo $nextMese ?>/"> >></a> 
+</h3>
+-->

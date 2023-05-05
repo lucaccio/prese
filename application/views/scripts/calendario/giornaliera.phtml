@@ -1,0 +1,192 @@
+<style type="text/css">
+    .dispari {
+        background-color:#CCCCCC;
+    }
+    .pari {
+         
+    }
+</style>
+
+
+<?php
+ 
+$dayOfWeek = array(
+    '0' => 'D',
+    '1' => 'L',
+    '2' => 'M',
+    '3' => 'M',
+    '4' => 'G',
+    '5' => 'V',
+    '6' => 'S'
+);
+
+ $mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+ );
+ 
+    $year = $this->year;
+    $prev = $this->month - 1 ;
+    $next = $this->month + 1 ;     
+ 
+    if($prev == 0 ) { 
+             $prevMese = 12;
+             $prevAnno = $year - 1;
+         } else {
+             $prevMese = $prev;
+             $prevAnno = $this->year;
+    }
+         
+    if($next == 13) {
+             $nextMese = 1;
+             $nextAnno = $year +1;
+         } else {
+             $nextMese = $next;
+             $nextAnno = $this->year;
+    }
+         
+  ?>
+
+
+
+<h3>Vista Giornaliera</h3>
+
+<h3 align="center"> 
+        <a class="prev" href="<?php echo $this->baseUrl('index.php')?>/calendario/giornaliera/anno/<?php echo $prevAnno ?>/mese/<?php echo $prevMese ?>/"><<   </a> 
+            <?php echo $this->stampaMese($this->month) . ' ' . $this->year ?> 
+        <a class="next" href="<?php echo $this->baseUrl('index.php')?>/calendario/giornaliera/anno/<?php echo $nextAnno ?>/mese/<?php echo $nextMese ?>/"> >></a> 
+</h3>
+
+<form action="" method="post">
+    
+    <select name="post-mese">
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php foreach($mesi as $k => $v) { ?>
+                <?php if($this->month == $k) { continue; } ?>
+                <option value="<?php echo $k ?>"><?php echo $v ?></option>
+        <?php } ?>
+    </select>
+    
+    <select name="post-anno">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option> 
+        <option value="2012">2012</option>
+        <option value="2013">2013</option>
+        <option value="2014">2014</option>
+        <option value="2015">2015</option>
+        <option value="2016">2016</option>
+    </select>
+    
+    <input type="submit" name="submit" value="Seleziona" />
+    
+</form>
+<br>
+
+
+<?php
+
+$anno      = $this->year;
+$mese      = $this->month;
+$pasquetta = Application_Model_Pasqua::pasquetta($anno);
+$sabato    = false;
+$domenica  = false; 
+
+echo "<table border=1 width=\"100%\"><thead><th width=\"130px\">" . $mesi[$mese] . ' ' . $year . "</th>";
+        
+        if($mese < 10) {
+               $mese = '0'.$mese; 
+        }
+        //procedura per il colore dei giorni del mese
+        for($i = 1; $i<=cal_days_in_month(CAL_GREGORIAN, $mese, $anno); $i++)  {
+            //per stampare il giorno della settimana devo determinarne il numero
+            $dOfW = date('w', mktime(0,0,0,$mese, $i, $anno));
+            if($i< 10) {
+                $i = '0'.$i;
+            }
+            $domenica  = Application_Service_Tools::isSunday(date($anno.'-'.$mese.'-'.$i));
+            $adesso    = new DateTime($anno .'-'.$mese.'-'.$i);
+            $adesso    = $adesso->getTimestamp();
+            $festivita = Application_Service_Tools::isHoliday(date($anno.'-'.$mese.'-'.$i));
+            
+            
+            if(!$domenica && ($adesso != $pasquetta) && !$festivita ){
+                echo "<th width=\"25px\">$dayOfWeek[$dOfW] <br> $i</th>";
+            } else {
+                echo "<th width=\"25px\" bgcolor=\"#FF0000\">$dayOfWeek[$dOfW] <br> $i</th>";
+            }
+        }  //fine procedura giorni
+        
+        $uid = 0;
+        foreach($this->users as $user){
+            $uid++;
+            $user_id = $user->getId();
+            
+            if($uid % 2 == 1) {
+                $class = 'dispari';
+            } else {
+                $class = 'pari';
+            }
+            
+            /*
+            if(array_key_exists($user_id, $user->getEvents())) {
+                    $stampaEvento = true;
+            } else {
+                    $stampaEvento = false;
+            }
+            */
+            
+            echo "<tr class=\"$class\">";
+            echo "<td><b><a href=\"{$this->baseUrl('index.php')}/user/view/user_id/{$user->getId()}\">".$user->getAnagrafe()."</a></b></td>";
+            for($i = 1; $i<=cal_days_in_month(CAL_GREGORIAN, $mese, $anno); $i++)  {
+                if($i< 10) {
+                    $i = '0'.$i;
+                }
+                              
+               $D = $anno .'-'.$mese.'-'.$i;
+               $sabato    = false;
+               $domenica  = false;
+               $sabato    = Application_Service_Tools::isSaturday($D);
+               $domenica  = Application_Service_Tools::isSunday($D);
+               $pasquetta = Application_Service_Tools::isEasterMonday($D);
+                //STAMPO L'ASSENZA
+                    $e = array();
+                    $e = $user->getEvents();
+                    
+                    if(!$user->isAssunto($D)) {
+                        echo "<td align=\"center\"></td>";
+                    } else {
+                        if( @array_key_exists($D, $e[$user->getId()]) ) {
+                            $x = $e[$user->getId()];
+                            echo "<td align=\"center\" bgcolor=\"#00FF00\">" . $this->siglatipo($x[$D]) ."</td>";
+                        } else {
+                            if($D <= date('Y-m-d')) {
+                                if($sabato) {
+                                    echo "<td align=\"center\">" . $user->getContratto()->getRidotto() . "</td>";
+                                } elseif($domenica) {
+                                        echo "<td align=\"center\" bgcolor=\"#ffffff\"></td>";
+                                } elseif($pasquetta) {
+                                        echo "<td align=\"center\" bgcolor=\"#ffffff\"></td>";
+                                } elseif(Application_Service_Tools::isHoliday($D, $user->getSede()->getSedeId())) {
+                                        echo "<td align=\"center\" bgcolor=\"#FFffff\"></td>";
+                                } else {
+                                           echo "<td align=\"center\">" . $user->getContratto()->getPieno() . "</td>";
+                                }
+                            } else {
+                                    echo "<td align=\"center\"></td>";
+                            }
+                        }
+                    }
+            }
+            echo "</tr>";
+        }   
+        echo "</thead>";
+        echo "</table>";

@@ -1,0 +1,149 @@
+ <?php 
+        
+        if(Zend_Auth::getInstance()->hasIdentity()) {
+            $identity =  Zend_Auth::getInstance()->getIdentity() ;
+            $level = new Application_Model_LevelMapper();
+            $role = $level->findByLevelId($identity->level_id)->descrizione;
+            
+            //echo $role;
+            
+            //$menu = strtolower($role) . 'Menu';
+            //echo $this->navigation()->menu()->renderMenu($this->layout()->$menu);
+            $this->identity_num = $identity->user_id;
+            $top = '[' . $role . '] ' . $identity->nome . ' ' . $identity->cognome . ' <a href="'.$this->baseUrl('index.php').'/auth/logout">Logout</a>'; 
+            
+            $menubar = strtolower($role);
+            
+            $menu = $this->navigation()->menu()->renderMenu($this->layout()->$menubar); 
+            
+            
+        } else {
+            $top = '';
+            $menu = '';
+        }
+        ?>
+<!DOCTYPE html>
+<html>
+    <head>
+        
+        <title>Layout FerieManager</title>
+        <?php 
+        
+         $this->headLink()->appendStylesheet($this->baseUrl().'/development-bundle/themes/base/jquery.ui.all.css');
+         $this->headScript()->appendFile($this->baseUrl().'/development-bundle/jquery-1.8.2.js');
+         $this->headScript()->appendFile($this->baseUrl().'/jquery-ui-1.9.1/ui/jquery-ui.js');
+         //$this->headScript()->appendFile($this->baseUrl().'/development-bundle/ui/jquery.ui.core.js');
+         //$this->headScript()->appendFile($this->baseUrl().'/development-bundle/ui/jquery.ui.widget.js');
+         //$this->headScript()->appendFile($this->baseUrl().'/development-bundle/ui/jquery.ui.datepicker.js');
+         $this->headLink()->appendStylesheet($this->baseUrl().'/development-bundle/demos/demos.css');
+         $this->headScript()->appendFile($this->baseUrl().'/development-bundle/ui/ui.datepicker-it.js');
+         //$this->headScript()->appendFile($this->baseUrl().'/jquery.tablesorter/jquery.tablesorter.js');
+         //$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.tablesorter/themes/blue/style.css');
+         $this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+         
+         
+         
+         
+        echo $this->headLink();
+        echo $this->headScript() 
+                
+                
+                
+                ?>
+        
+        
+        
+        <!--
+        <link rel="stylesheet" href="<?php echo $this->baseUrl() ?>/development-bundle/themes/base/jquery.ui.all.css">
+	<script src="/development-bundle/jquery-1.8.2.js"></script>
+	<script src="/development-bundle/ui/jquery.ui.core.js"></script>
+	<script src="/development-bundle/ui/jquery.ui.widget.js"></script>
+	<script src="/development-bundle/ui/jquery.ui.widget.js"></script>
+	<link rel="stylesheet" href="/development-bundle/demos/demos.css">
+	-->
+
+<script type="text/javascript">
+$(document).ready(function () {	
+	
+	$('.navigation li').hover(
+		function () {
+			//show its submenu
+			$('ul', this).stop().slideDown(100);
+
+		}, 
+		function () {
+			//hide its submenu
+			$('ul', this).stop().slideUp(100);			
+		}
+	);
+	
+});
+	</script>
+
+       <style type="text/css">
+           
+           .navigation{
+               margin:0;padding:0;list-style:none;border:solid;border-color: white;height: 31px; 
+           }
+           .navigation li{
+               float:left;display:block;width:100px;background:#ccc;position:relative;z-index:500;margin:0 1px;
+           }
+           .navigation li a{
+               display:block;padding:8px 5px 0 5px;font-weight:700;height:23px;text-decoration:none;color:#fff;text-align:center;color:#333;
+           }
+           .navigation li a:hover{
+               color:#fff;
+           }
+           .navigation a.selected{
+               color:#f00;
+           }
+           .navigation ul{
+               position:absolute;left:0;display:none;margin:0 0 0 -1px;padding:0;list-style:none;
+           }
+           .navigation ul li{
+               width:100px;float:left;border-top:1px solid #fff;}
+           .navigation ul a{
+               display:block;height:15px;padding:8px 5px;color:#666;
+           }
+           .navigation ul a:hover{
+               text-decoration:underline;
+           }
+           
+           
+           .navigation ul{
+               margin:0 0 0 -2px;
+           }
+       </style>
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    </head>
+    
+    <body>
+        
+        <div>   
+            <h2>FerieManager</h2>
+            <?php echo $top;?> 
+        </div>
+        
+        <br>
+        
+        <div>    
+        <?php echo $menu; ?>
+        </div>      
+        
+        <br>
+        
+        
+        <div id="content">
+        <?php echo $this->layout()->content ; ?> 
+        </div>
+        
+        <br>
+        
+            
+        
+        
+        
+        
+    </body>
+</html>

@@ -1,0 +1,141 @@
+<script>
+  $(function() {
+    $( "#assunzionepicker" ).datepicker({ dateFormat: 'dd-mm-yy' });
+    $( "#cessazionepicker" ).datepicker({ dateFormat: 'dd-mm-yy' });
+  });
+  </script>
+  
+  
+<h3>Modifica dati personali</h3>
+
+<form action="" method="POST">
+    <table>
+        <tbody>
+            <tr><td>Nome</td><td><input type="text" name="nome" value="<?php echo $this->user->getNome() ?>" readonly="true" /></td></tr>
+            <tr><td>Cognome</td><td><input type="text" name="cognome" value="<?php echo $this->user->getCognome() ?>" readonly="true" /></td></tr>
+            <tr><td>Username</td><td><input type="text" name="username" value="<?php echo $this->user->getUsername() ?>" readonly="true" /></td></tr>
+            
+            <tr><td>Email</td><td><input type="text" name="email" value="<?php echo $this->user->getEmail() ?>"   /></td></tr>
+            
+            <tr>
+                <td>Ruolo</td>
+                <td>
+                     <select name="level_id">
+                        <option value="<?php echo $this->user->getLevel()->getLevelId() ?>" ><?php echo $this->user->getLevel()->getDescrizione()?></option>
+                        <?php foreach($this->level as $k=>$v) { ?>
+                        <?php if( $this->user->getLevel()->getLevelId() == $v->level_id )  {continue;}?>
+                        <option value="<?php echo $v->level_id ?>"><?php echo ucfirst($v->descrizione) ?> </option>
+                        <?php } ?>
+                    </select>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Tipo Contratto</td>
+                <td>
+                     <select name="contratto_id">
+                        <option value="<?php echo $this->user->getContratto()->getContrattoId() ?>" ><?php echo $this->user->getContratto()->getDescrizione()?></option>
+                        <?php foreach($this->contratti as $k=>$v) { ?>
+                        <?php if( $this->user->getContratto()->getContrattoId() == $v->contratto_id )  {continue;}?>
+                        <option value="<?php echo $v->contratto_id ?>"><?php echo ucfirst($v->descrizione) ?> </option>
+                        <?php } ?>
+                    </select>
+                </td>
+            </tr>
+            
+            <tr>
+                <td>Sede Negozio</td>
+                <td>
+                    <select name="sede_id">
+                        
+                        <?php if('' == $this->user->getSede()->getSedeId()) { ?>
+                            <option value="">NO SEDE</option>
+                        <?php } else { ?>
+                            <option value="<?php echo $this->user->getSede()->getSedeId() ?>" ><?php echo $this->user->getSede()->getCitta() ?></option>
+                        <?php } ?>
+
+                            
+                        <?php foreach($this->sedi as $k=>$v) { ?>
+                        <?php if( $this->user->getSede()->getSedeId() == $v->sede_id )  {continue;}?>
+                        <option value="<?php echo $v->sede_id ?>"><?php echo ucfirst($v->citta) ?> </option>
+                        <?php } ?>
+                        <option value="">NO SEDE</option>
+                    </select>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>Sede Patrono</td>
+                <td>
+                    <select name="sede_lavoro">
+                        <?php if('' == $this->user->getConfiguration()->sede_lavoro) { ?>
+                            <option value="">NO SEDE PATRONO</option>
+                        <?php } else {
+
+                           // $sede_lavoro = $this->user->getConfiguration()->sede_lavoro;
+
+                            ?>
+                            <option value="<?php echo $this->user->getConfiguration()->sede_lavoro ?>" ><?php echo ucfirst($this->sede_lavoro->getCitta()) ?></option>
+                        <?php } ?>
+
+
+                        <?php foreach($this->sedi as $k=>$v) { ?>
+                            <?php if( $this->user->getConfiguration()->sede_lavoro == $v->sede_id )  {continue;}?>
+                            <option value="<?php echo $v->sede_id ?>"><?php echo ucfirst($v->citta) ?> </option>
+                        <?php } ?>
+
+                    </select>
+
+
+                </td>
+            </tr>
+
+            <tr>
+                <td>Patrono lavorativo</td>
+                <td>
+                    <select name='patrono_lavorativo'>
+                        <?php if(!$this->user->getConfiguration()->patrono_lavorativo) { ?>
+                            <option value="0">NO</option>
+                            <option value="1">SI</option>
+                        <?php } else { ?>
+                            <option value="1">SI</option>
+                            <option value="0">NO</option>
+                        <?php } ?>
+                    </select>
+
+                </td>
+            </tr>
+
+            <tr>
+                <td>Data di assunzione</td>
+               <td> <input type="text" id="assunzionepicker" name="data_assunzione" value="<?php echo $this->user->getAssunzione('dd-MM-YYYY') ?>" /></td>
+            </tr>
+            
+            <tr>
+                 <td>Data di cessazione</td>
+               <td> <input type="text" id="cessazionepicker" name="data_cessazione" value="<?php echo $this->user->getCessazione('dd-MM-YYYY') ?>" /></td>
+                
+            </tr>
+            
+            
+            
+            <!--<tr><td>Vecchia password</td><td><input type="password" name="oldpw" /></td></tr>-->
+            <tr><td>Nuova password</td><td><input type="password" name="newpw" /></td></tr>
+            <tr><td>Ridigita password</td><td><input type="password" name="renewpw" /></td></tr>
+            
+            
+            
+            
+        </tbody>
+    </table>
+    <input type="hidden" name="user_id" value="<?php echo $this->user_id ?>" />
+    <input type="submit" name="submit" value="Aggiorna" />
+</form>
+
+
+
+
+
+
+ 

@@ -1,0 +1,39 @@
+<script>
+    $(function() {
+		
+           $( "#data" ).datepicker({dateFormat: "dd-mm-yy"} );
+          
+	});
+</script>
+<h2>
+    Primanota spese (sostituzione n. <?php echo $this->sostituzione_id?>)
+</h2>
+
+<p>Importo concesso  <b>&euro; <?php echo $this->importo ?></b></p>
+
+<p>Importo disponibile <b>&euro; <?php echo $this->disponibile ?></b></p>
+<hr size="1" />
+
+
+
+<form action="" method="POST">
+    
+    
+    <label>Descrizione breve: </label><br><input type="text" name="descrizione" value="" size="50px"/><br>
+    <label>Data: </label><br><input type="text" name="data" value="" id="data"/><br>
+    <label>Budget totale: </label><br><input type="text" name="importo" value="<?php echo round($this->importo, 2)?>" readonly="true"/><br>
+    <label>Budget disponibile: </label><br><input type="text" name="importo" value="<?php echo round($this->disponibile, 2)?>" readonly="true"/><br>
+    <label>Uscita Cassa: </label><br><input type="text" name="cassa" value="" /><br>
+    
+    <label>Uscita Banca: </label><br><input type="text" name="banca" value="" /><br>
+    
+    <label>Note</label><br>
+    <textarea rows="5" cols="40" name="note" value=""></textarea>
+    
+    <input type="hidden" name="sostituzione_id" value="<?php echo $this->sostituzione_id?>" /><br>
+    <input type="hidden" name="token" value="<?php echo $this->token ?>" /><br>
+    
+    <input type="submit" name="submit" value="Salva" />
+    
+</form>
+

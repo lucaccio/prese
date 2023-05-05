@@ -1,0 +1,25 @@
+Array
+(
+    [37] => Array
+        (
+            [nome] => Uda Luca
+            [email] => lucauda.prisma@gmail.com
+            [promemoria] => Array
+                (
+                    [0] => Array
+                        (
+                            [start] => 2013-06-06
+                            [stop] => 2013-06-06
+                        )
+
+                    [1] => Array
+                        (
+                            [start] => 2013-06-07
+                            [stop] => 2013-06-07
+                        )
+
+                )
+
+        )
+
+)

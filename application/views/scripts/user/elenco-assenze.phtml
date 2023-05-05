@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<style>
+    .td {
+        border-style: solid;
+        border-width: 1px;
+        border-color: black;
+        text-align: center; 
+        padding: 5px;
+    }
+</style>
+
+<h2>Storico assenze di <?php echo $this->user->getAnagrafe() ?></h2>
+
+<table>
+    <thead align="left">
+    <th>Da</th>
+    <th>A</th>
+    <th>Tipo</th>
+    <th>Giorni</th>
+    </thead>
+    <tbody>
+        
+  
+
+<?php foreach($this->assenze as $k => $row) { ?>
+    <tr class="tr">
+        <td class="td"><?php echo $row->dateStart ?></td>
+        <td class="td"><?php echo $row->dateStop ?></td> 
+        <td class="td"><?php echo $this->tipologia( $row->tipologia_id ) ?></td> 
+        <td class="td"><?php echo $row->giorni ?></td> 
+    </tr> 
+<?php
+
+    // 24/05/16
+    if(array_key_exists($row->tipologia_id, $this->totali))
+    {
+        $this->totali[$row->tipologia_id]['giorni'] += $row->giorni;
+    } else {
+        $this->totali[$row->tipologia_id] = array(
+            'giorni' => $row->giorni,
+            'sigla' => $this->tipologia( $row->tipologia_id ) );
+    }
+
+
+}
+
+
+?>
+    </tbody>
+</table>
+
+<h3>Totali</h3>
+<table>
+    <thead align="left">
+    <th>Tipo</th>
+    <th>Giorni</th>
+    </thead>
+<tbody>
+<?php foreach($this->totali as $k => $v) { ?>
+<tr class="tr">
+    <td class="td"><?php echo $v['sigla'] ?></td>
+    <td class="td"><?php echo $v['giorni'] ?></td>
+ <?php } ?>
+</tr>
+</tbody>
+</table>

@@ -1,0 +1,28 @@
+<h2>Ultime 20 richieste aggiornate</h2>
+<?php 
+//Zend_Debug::dump($this->elenco); 
+
+define('STATUS', array(
+    0 => 'in lavorazione',
+    1 => 'accettato',
+    2 => 'cancellato',
+    3 => 'rifiutato',
+    4 => 'annullato'
+));
+
+?>
+<table>
+
+<?php foreach($this->elenco as $k => $v) { ?>
+
+<tr>
+<td><?php echo $v->getUser(); ?></td>
+<td><?php echo $v->getTipologia()->descrizione; ?></td>
+<td><?php echo $v->getDateStart(); ?></td>
+<td><?php echo $v->getDateStop(); ?></td>
+<td><?php echo strtoupper(STATUS[$v->getStatus()]); ?></td>
+</tr>
+
+<?php }?>
+
+</table>

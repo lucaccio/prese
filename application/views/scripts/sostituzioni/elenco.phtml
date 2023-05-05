@@ -1,0 +1,167 @@
+<?php
+ //$this->headScript()->appendFile($this->baseUrl().'/jquery.chromatable-1.3.0/jquery.chromatable.js');
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+$mesi = array(
+        "0" => "Intero anno",
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+?>
+<style type="text/css">
+    .da-eseguire{
+        color:red;
+    }
+    .in-corso{
+         color:white;
+         background-color:red;
+    }
+    .eseguito{
+        text-decoration: line-through;
+        color:green;
+    }
+</style>
+<script>
+  $(function(){  
+        $("#sostituzioni").chromatable({
+                  width: "100%", 
+		height: "auto" ,
+                scrolling: "yes"
+	});
+
+        $("SELECT").selectBox(); 
+
+  });
+</script>
+
+<?php if(count($this->elenco) > 0 ) { 
+    
+    $tot = count($this->elenco);
+} else {
+    $tot = 0;
+}
+    ?>
+
+
+<h2>Elenco sostituzioni</h2>
+
+
+<h4>Presenti: <?php echo $tot;?></h4>
+<form action="" method="post" >
+    
+   
+    
+    <select name="month">
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php for($i = 0; $i <= 12   ; $i++) { 
+            if($i == $this->month) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $mesi[$i] ?></option>
+        <?php } ?>
+    </select> 
+    
+    <select name="year">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option> 
+        <?php for($i = 2012; $i<=date('Y') + 1 ; $i++) { 
+            if($i == $this->year) { continue; } ?>
+          <option value="<?php echo $i?>"><?php echo $i ?></option>
+        <?php } ?>
+    </select>
+      
+    <input type="submit" name="submit" value="Cerca" />
+     
+</form>
+<p></p>
+<?php if(count($this->elenco) > 0 ) {  ?>
+
+ 
+<table id="sostituzioni">
+    <thead align="left">
+    <th>Sostituzione N.</th>
+    <th>Citta</th>
+    <th>Periodo Dal</th>
+    <th>Periodo Al</th>
+    <th>Tipo sostituzione</th>
+    <th>Giorni</th>
+    <th>Status</th>
+    <th>Alloggio</th>
+    <th>Budget</th>
+    <th>Primanota</th>
+    </thead>
+    <tbody>
+<?php foreach($this->elenco as $row) { ?>
+
+    <?php
+    //print_r($row);_
+    //row = application_Model_Sostituzione
+         $status = 'Da eseguire';
+         $class = "da-eseguire"; 
+         if( $row->getDateStop() >= date('Y-m-d') && $row->getDateStart() <= date('Y-m-d')) {
+             $status = 'In corso';
+             $class = "in-corso"; 
+         } elseif($row->getDateStop() < date('Y-m-d')) {
+             $status = 'Eseguito';
+             $class = "eseguito"; 
+         }
+         
+    ?>
+    
+    
+    <tr  >
+        <td><?php echo $row->getId() ?></td>
+        <td><?php echo ucfirst($row->getSede()) ?></td>
+        
+        <td><?php echo $this->formatDate($row->getDateStart())  ?></td>
+        <td><?php echo $this->formatDate($row->getDateStop()) ?></td>
+        
+        <td><?php echo $this->Tipologia( $row->getAssenza()->getTipologiaId())  ?></td> 
+        <td><?php echo $row->getGiorni() ?></td> 
+        
+        <td class="<?php echo $class ?>"><?php echo $status ?></td>
+                
+        <td>
+            <?php 
+            if($row->getStruttura()->count() > 0) {
+                echo $row->getStruttura()->getDenominazione() . ' - ' .  ucfirst($row->getStruttura()->getIndirizzo()) . ' [' . ucfirst($row->getStruttura()->getCitta()) .']';
+            } else {
+                echo "Nessun alloggio selezionato";
+            } 
+            
+            ?>
+        </td>
+        
+        <td></td>
+        
+        <td>
+            <a href="<?php echo $this->baseUrl('index.php')?>/primanota/nuova/sostituzione_id/<?php echo $row->getId() ?>">Aggiungi</a> | 
+            <a href="<?php echo $this->baseUrl('index.php')?>/primanota/view/sostituzione_id/<?php echo $row->getId() ?>">Visualizza</a>
+        </td>
+    </tr>
+
+
+<?php } ?>
+    </tbody>
+</table>
+  <?php
+  if(isset($this->messages )) {
+        foreach($this->messages as $message){
+            echo $message . "<br/>";
+        }
+  }
+  ?>
+
+
+ <?php } else { ?>
+ 
+ <h3>Nesuuna sostituzione presente</h3>
+
+<?php } ?>

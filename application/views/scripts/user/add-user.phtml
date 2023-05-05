@@ -1,0 +1,97 @@
+<script>
+$(function() {
+		
+           $( "#data_assunzione" ).datepicker({dateFormat: "dd-mm-yy"} );
+           $( "#data_cessazione" ).datepicker({dateFormat: "dd-mm-yy"} );
+	});
+</script>
+
+<h3>Aggiungi utente</h3>    
+<form method='post' action="">
+    
+    
+    <table>
+    
+        <tr>
+           <td><label>Ruolo</label> </td>
+           <td>
+            <select name='level_id'>
+                <?php foreach($this->level as $k=>$v) { ?>
+                    <option value="<?php echo $v->level_id ?>"><?php echo ucfirst($v->descrizione) ?></option>
+                <?php } ?>
+            </select>
+           </td>
+        </tr>
+        
+        <tr>
+           <td><label>Sede Negozio</label> </td>
+           <td>
+            <select name='sede_id'>
+                <option value="0">No Sede</option>
+                 <?php foreach($this->sedi as $k=>$v) { ?>
+                    <option value="<?php echo $v->sede_id ?>"><?php echo ucfirst($v->citta) ?> </option>
+                  <?php } ?>
+            </select>
+           </td>
+        </tr>
+        
+        
+        
+        
+        <tr>
+            <td><label>Nome</label></td>
+            <td><input type="text" name="nome" value="<?php echo $this->nome ?>"/></td>
+        </tr>
+         
+        <tr> 
+            <td><label>Cognome</label></td>
+            <td><input type="text" name="cognome" value="<?php echo $this->cognome ?>"/></td>
+        </tr>
+          
+        <tr>
+            <td><label>Email</label> </td>
+            <td><input type="text" name="email" value="<?php echo $this->email ?>"/></td>
+        </tr>
+        
+        
+        <tr>
+            <td><label>Imposta Username</label> </td>
+            <td><input type="text" name="username" value=""/></td>
+        </tr>
+           
+        <tr>
+          <td><label>Imposta Password</label> </td>
+          <td><input type="password" name="password" value=""/></td>
+        </tr>
+        
+        <tr>
+          <td><label>Tipo Contratto</label> </td>
+          <td>
+          <select name='contratto_id'>
+                <option value="0">Inserire tipo contratto</option>
+                 <?php foreach($this->contratto as $k=>$v) { ?>
+                    <option value="<?php echo $v->contratto_id ?>"><?php echo ucfirst($v->descrizione) ?> </option>
+                  <?php } ?>
+            </select>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><label>Data Assunzione</label> </td>
+          <td><input type="text" name="data_assunzione" id="data_assunzione" value="<?php echo date('d-m-Y'); ?>"/></td>
+        </tr>
+        
+        <tr>
+          <td><label>Data Cessazione Rapporto Lavorativo</label> </td>
+          <td><input type="text" name="data_cessazione" id="data_cessazione"/></td>
+        </tr>
+        
+        
+        <tr>
+            <td><input type="submit" value="Salva" /></td>
+        </tr>
+            
+           
+            
+    </table>         
+        </form>

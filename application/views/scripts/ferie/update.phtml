@@ -1,0 +1,65 @@
+
+
+<h3>
+    SITUAZIONE FERIE / PERMESSI
+</h3>
+
+<form action="" method="post">
+    
+    
+    
+    <table width="70%">
+        
+        <thead align="left">
+            <th colspan="3">Dipendente</th>
+            
+            
+            <th>Precedente</th>
+            <th>Goduto</th>
+            <th>Residuo</th>
+        
+        </thead>
+        
+        
+    <tr>
+        <td><?php echo strtoupper($this->utente->getAnagrafe()) ?></td>
+        <td>Ferie</td>
+        <td>Giorni</td>
+        <td><input type="text" name="precedente[]" value="<?php echo $this->ferie->precedente ?>"/></td>
+        <td><input type="text" name="goduto[]" value="<?php echo $this->ferie->goduto ?>"/></td>
+        <td><input type="text" name="residuo[]" value="<?php echo $this->ferie->residuo ?>"/></td>
+        <input type="hidden" name="config[]" value="<?php echo $this->ferie->config_id ?>"/>
+    </tr>
+    <tr>
+        <td>Data ass. <?php echo $this->formatDate($this->utente->getAssunzione()) ?></td>
+        <td>Permessi</td>
+        <td>Ore</td>
+        <td><input type="text" name="precedente[]" value="<?php echo $this->permessi->precedente ?>"/></td>
+        <td><input type="text" name="goduto[]" value="<?php echo $this->permessi->goduto ?>"/></td>
+        <td><input type="text" name="residuo[]" value="<?php echo $this->permessi->residuo ?>"/></td>
+        <input type="hidden" name="config[]" value="<?php echo $this->permessi->config_id ?>"/>
+    </tr>
+    <tr>
+        <td></td>
+        <td>Ex-fest.</td>
+        <td>Ore</td>
+        <td><input type="text" name="precedente[]" value="<?php echo $this->exferie->precedente ?>"/></td>
+        <td><input type="text" name="goduto[]" value="<?php echo $this->exferie->goduto ?>"/></td>
+        <td><input type="text" name="residuo[]" value="<?php echo $this->exferie->residuo ?>"/></td>
+        <input type="hidden" name="config[]" value="<?php echo $this->exferie->config_id ?>"/>
+    </tr>
+    
+    
+    
+   
+    </table>
+    
+<!--    <input type="hidden" name="config_id" value="<?php echo $this->ferie->config_id ?>" />
+    <input type="hidden" name="user_id" value="<?php echo $this->ferie->user_id ?>" />
+    <input type="hidden" name="tipo value="<?php echo $this->ferie->tipo ?>" />
+-->
+    <p>
+        <input type="submit" name="submit" value="Salva" />
+    </p>
+    
+</form>

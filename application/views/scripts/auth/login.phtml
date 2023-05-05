@@ -1,0 +1,105 @@
+<?php 
+$this->headLink()->appendStylesheet($this->baseUrl().'/development-bundle/themes/base/jquery.ui.all.css');
+$this->headScript()->appendFile($this->baseUrl().'/development-bundle/jquery-1.8.2.js');
+$this->headScript()->appendFile($this->baseUrl().'/jquery-ui-1.9.1/ui/jquery-ui.js');
+
+echo $this->headLink();
+echo $this->headScript() 
+
+?>
+<script>  
+      $(function(){  
+        $( "#login" ).button();
+           
+    });
+</script>
+
+<style type="text/css">
+
+       
+       div#login-form {
+            width:300px;
+            margin-right:auto;
+            margin-left:auto;
+            font-family:arial;
+        }
+        #errormessage {
+            color: red;
+            background-color:lavenderblush;
+            padding: 5px;
+            border-color:red;
+            border-style:solid;
+            border-width: 1px; 
+            text-align: center;
+        }
+        #login {
+            font-size: 12px;
+        }
+        .center {
+            position: absolute;
+            top:15%;
+            left: 33%;
+        }
+        h2 {
+        margin : 0px;
+        padding: 0px;
+        margin-bottom: 5px;
+        font-size: 30px;
+    }
+    h4 {
+        margin : 0px;
+        padding: 0px;
+        margin-bottom: 20px;
+        font-size: 16px;
+    }
+    input {
+        height: 30px;
+        width: 250px;
+        font-size: 20px;
+    }
+    .td_label{
+        font-size: 20px;
+         
+    }
+</style>
+       
+<div id="login-form">
+    <div id="view-content" class="center">
+      <h2>FerieManager</h2>
+    <h4>Gestione ferie e permessi</h4>
+    <br />
+<form action="" method="POST">
+    
+    
+    <table>
+        <tr>
+            <td colspan="2" align="center">
+          
+            </td></tr>
+        <tr>
+           <td class="td_label">Utente</td>
+           <td><input type="text" name="username" /> </td> 
+        </tr>
+    
+        
+        <tr>
+          <td class="td_label">Password</td>
+          <td><input type="password" name="password" /></td>  
+        </tr>
+    
+        <tr>
+            <td></td>
+            <td><input type="submit" name="submit" value="Accedi" id="login"/></td></tr>
+    
+    </table>
+    
+    <p></p>
+     
+    
+</form>
+
+<?php if(isset($this->errormessage)) { ?>
+<h4 id="errormessage"><?php echo $this->errormessage ?></h4>
+<?php } ?>
+</div>
+</div>

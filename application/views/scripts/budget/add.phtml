@@ -1,0 +1,26 @@
+<script>
+    $(function() {
+        $( "#date" ).datepicker({dateFormat: "dd-mm-yy"} );
+    });
+</script>
+
+<h3>Aggiungi nuovo importo alla sostituzione</h3>
+<form action="" method="POST">
+    <table>
+        <tr>
+            <td>Importo &euro;</td>
+             <td><input type="text" name="importo" /></td>
+        </tr>
+        <tr>
+            <td>Del</td>
+            <td><input type="text" name="date" id="date" value="<?php echo date('d-m-Y') ?>"/></td>
+        </tr>
+        
+    </table>
+     
+    <input type="hidden" name="token" value="<?php echo $this->token?>" />
+    <input type="hidden" name="sostituzione_id" value="<?php echo $this->sostituzione_id?>" />
+    
+    <p><input type="submit" name="submit" value="Salva" /></p>
+    
+</form>

@@ -1,0 +1,75 @@
+
+
+SELECT * FROM users  WHERE user_id NOT IN (SELECT sostituto_id FROM assenze WHERE dateStart BETWEEN '2012-09-22' AND '2012-09-30') AND level_id='2'
+
+
+ echo $row->dateStart . ' => ' . $row->dateStop . '<br>';
+            
+            
+            $datetime1 = new DateTime($row->dateStart );
+            $datetime2 = new DateTime($row->dateStop);
+            $intervallo = $datetime1->diff($datetime2);
+            $int =  $intervallo->format('%a');
+            
+            //
+            $inizio =  $datetime1->getTimestamp();
+            $fine = $datetime2->getTimestamp();
+            
+            $totale = $int + 1; 
+            
+            
+             
+            
+             $i = 0;
+          
+             for ($i = $inizio; $i <= $fine; $i = $i + 86400) {
+            
+                
+               
+             
+             
+             if(0 == date('w', $i) ){
+                 $totale--;
+                 
+             }
+             
+             
+             }
+             
+             echo $totale .'<br>';
+
+
+//////////////////////////////////////////////
+/*	 * cerco disponibilita in base a periodo e appartamento	 */	
+public function check($data){							
+if(is_array($data)) {	 		
+$this->struttura = $data['struttura'];		
+$this->arrivo = 	$data['arrivo'];		
+$this->partenza = $data['partenza'];			
+$sql = "SELECT * FROM " . $this->table ." p 
+WHERE p.codice='".$this->struttura."' 
+AND p.periodoDal < '".$this->partenza."' 
+AND '".$this->arrivo."' < p.periodoAl
+AND display != '0'";	
+$check = DatabaseHandler::RowCount($sql);	
+if ($check == 0){	
+//LIBERO	
+$this->_free = true;	}		
+}
+
+
+
+////////////
+	$date = new DateTime();
+$date->modify('-1 day');		
+
+
+					$fine = $date->format("Y-m-d"); //ieri
+
+
+
+//controllo residuo inizio anno
+SELECT u.user_id, c.residuo, c.anno
+FROM users u
+JOIN config AS c ON c.user_id = u.user_id
+where c.anno='2011'

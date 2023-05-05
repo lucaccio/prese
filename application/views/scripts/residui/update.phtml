@@ -1,0 +1,138 @@
+<style type="text/css">
+    .thead {
+        background-color: #E0E0E0;
+         
+          
+    }
+        
+</style>
+<script>
+    var url = "<?php echo $this->baseUrl('index.php') ?>";
+    var uid = "<?php echo $this->utente->getId() ?>";
+    
+    function caricaresidui(uid, year) {
+        $.ajax({
+            url: url + '/residui/load/',
+            data: {
+                user_id: uid,
+                year:    year
+            },
+            dataType: 'json',
+            beforeSend: function(){
+                
+            },
+            success: function(data, status, xhr) {
+                console.log(data);
+                console.log(status);
+                console.log(xhr);
+                if(jQuery.isEmptyObject(data)) {
+                    console.log('nessun dato trovato');
+                    return;
+                }
+            },
+            error: function(xhr,status,e) {
+            }        
+        });
+    }
+    
+$( function() {
+    
+    $("#annualita").change( function() {
+        uid  = $("#utenti").attr('value');
+        year = $(this).attr('value');
+        window.location.href= url + '/residui/update/user_id/' + uid + '/year/' + year;
+        
+    });
+    
+    $("#utenti").change( function() {
+        uid  = $(this).attr('value');
+        year = $("#annualita").attr('value');
+        window.location.href= url + '/residui/update/user_id/' + uid + '/year/' + year;
+        
+    });
+});
+        
+</script>            
+<h2>
+    Residui di <?php echo $this->utente->getAnagrafe() ?> - 
+    Data di assunzione: <?php echo $this->assunzione->toString('d/MM/Y')?>
+
+</h2> 
+ 
+
+<div>
+    
+    <label>Utente: </label>
+    <select name="user_id" id="utenti">
+    <?php if(isset($this->utente)) { ?>
+        <option value="<?php echo $this->utente->getId() ?>"><?php echo $this->utente->getAnagrafe() ?></option>
+    <?php } ?>
+    <?php 
+        foreach ($this->users as $k => $user) { 
+            if($k == $this->utente->getId()) continue;
+        ?>
+        <option value="<?php echo $user->getId() ?>"><?php echo $user->getAnagrafe() ?></option>
+    <?php } ?>
+    </select>
+    
+    
+    <label>Anno: </label>
+    <select name="annualita" id="annualita">
+        <?php
+        $now = date('Y');
+        if(isset($this->year)) { ?>
+             <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option>
+        <?php }  
+        for($i = 2007; $i <= $now; $i++) { 
+            if(isset($this->year)) {
+                if($i == $this->year ) 
+                    continue;
+            }
+         ?>
+         <option value="<?php echo $i ?>"><?php echo $i ?></option>
+        <?php } ?>
+    </select>
+    
+    <form action="#" method="POST">
+        <p>
+    <table  cellspacing="0px" border="0" cellpadding="5px" id="">
+        <thead align="left" class="thead">
+            <th>Anno</th>
+            <th>Tipo</th>
+            <th>Precedente</th>
+            <th>Maturato</th>
+            <th>Goduto</th>
+            <th>Rimanenza Totale</th>
+        </thead>
+        <tbody>
+        <?php 
+        $i = 1;
+        if($this->residui) {
+            
+            foreach($this->residui as $k => $residuo) { ?>
+            <tr>
+                <td><?php echo $residuo->year ?></td>
+                <td><?php echo $residuo->tipo ?></td>
+                <td><input type="text" name="riga[<?php echo $i ?>][precedente]" value="<?php echo $residuo->precedente ?>" /></td>
+                <td><input type="text" name="riga[<?php echo $i?>][maturato]" value="<?php echo $residuo->maturato ?>" /></td>
+                <td><input type="text" name="riga[<?php echo $i ?>][goduto]" value="<?php echo $residuo->goduto ?>" /></td>
+                <td><input type="text" name="riga[<?php echo $i?>][totale]" value="<?php echo $residuo->totale ?>" /></td>
+                <td><input type="hidden" name="riga[<?php echo $i ?>][id]" value="<?php echo $residuo->id ?>"</td>
+                <td></td>
+            </tr>
+            <?php $i ++; } }?>
+        </tbody>
+    </table>
+    </p>
+    <p><input type="submit" name="submit" value="Salva" /></p>
+    </form>
+</div>
+
+<?php if (count($this->messages)) : ?>
+<ul id="messages">
+<?php foreach ($this->messages as $message) : ?>
+<li><b><?php echo $this->escape($message); ?></b></li>
+<?php endforeach; ?>
+</ul>
+<?php endif; ?>
+

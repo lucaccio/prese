@@ -1,0 +1,20 @@
+<h2>Elenco tipologie di assenze</h2>
+
+
+<table>
+
+
+
+<?php
+
+    foreach($this->list as $k => $row)  {
+        echo "<tr>";
+        echo "<td>" . $row->sigla . '</td>' ;
+        echo "<td>" . $row->descrizione . '</td> ' ;
+        echo "</tr>";
+
+    }
+
+?>
+
+</table>

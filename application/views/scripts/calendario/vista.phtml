@@ -1,0 +1,201 @@
+<style type="text/css">
+body {
+   
+}
+ 
+.standardW {
+     
+     min-height: 150px;
+     border-color:#b0c4de; 
+     border-style:solid
+}
+.giorno {
+     
+     text-align:right;
+     margin: 0;
+}
+
+.testo-interno {
+    font-size: 12px;
+}
+
+</style>
+
+
+
+<h3>Vista Mensile</h3>
+
+ <?php
+ 
+ $mesi = array(
+        "1" => "Gennaio", 
+        "2" => "Febbraio",
+        "3" => "Marzo",
+        "4" => "Aprile",
+        "5" => "Maggio",
+        "6" => "Giugno",
+        "7" => "Luglio",
+        "8" => "Agosto",
+        "9" => "Settembre",
+        "10" => "Ottobre" ,
+        "11" => "Novembre",
+        "12" => "Dicembre"
+          
+ );
+ 
+ 
+    $year = $this->year;
+    $prev =  $this->month - 1 ;
+    $next =   $this->month + 1 ;     
+ 
+    if($prev == 0 ) { 
+             $prevMese = 12;
+             $prevAnno = $year - 1;
+         } else {
+             $prevMese = $prev;
+             $prevAnno = $this->year;
+         }
+         
+         if($next == 13) {
+             $nextMese = 1;
+             $nextAnno = $year +1;
+         } else {
+             $nextMese = $next;
+             $nextAnno = $this->year;
+         }
+         
+  ?>
+
+
+
+
+
+<h3 align="center"> 
+        <a class="prev" href="<?php echo $this->baseUrl('index.php')?>/calendario/vista/anno/<?php echo $prevAnno ?>/mese/<?php echo $prevMese ?>/"><< </a> 
+            <?php echo $this->stampaMese($this->month) . ' ' . $this->year ?> 
+        <a class="next" href="<?php echo $this->baseUrl('index.php')?>/calendario/vista/anno/<?php echo $nextAnno ?>/mese/<?php echo $nextMese ?>/"> >></a> 
+</h3>
+
+
+
+<form action="" method="post">
+    
+    <select name="post-mese">
+         
+        <option value="<?php echo $this->month ?>"><?php echo $mesi[$this->month] ?></option> 
+        <?php foreach($mesi as $k => $v) { ?>
+                <?php if($this->month == $k) { continue; } ?>
+                <option value="<?php echo $k ?>"><?php echo $v ?></option>
+        <?php } ?>
+      
+    </select>
+    
+    <select name="post-anno">
+        <option value="<?php echo $this->year ?>"><?php echo $this->year ?></option> 
+        <option value="2012">2012</option>
+        <option value="2013">2013</option>
+        <option value="2014">2014</option>
+        <option value="2015">2015</option>
+        <option value="2016">2016</option>
+    </select>
+    
+    <input type="submit" name="submit" value="Seleziona" />
+    
+</form>
+<br>
+
+<?php
+     
+       
+       echo '<table width=\'100%\'>';
+       echo '<tbody>';
+       foreach($this->calendar->getDays() as $day) {
+            echo '<th align=\'center\'>'.$day.'</th>';
+       }
+       echo '</tbody>';
+       echo '<tr>';
+       
+       //se è domenica allora 0 diventa 7
+       $this->calendar->getFirstDay() == 0 ? $this->calendar->setFirstDay(7) : $this->calendar->getFirstDay();
+       
+        //genero i giorni del mese precedente per completare il calendario
+       $prev_days = $this->calendar->_getDays($this->calendar->getPreviousMonth()) - $this->calendar->getFirstDay() + 2 ;
+       
+       for($i = 1; $i < $this->calendar->getFirstDay(); $i++) {
+           echo '<td  style="color:#c0c0c0" width="14.25%"><div class="standardW"><p class="giorno">'.$prev_days.'</p></div</td>';
+           $prev_days++;
+       }
+       
+       
+       //okkio qui che non stampa l'evento di ogni domenica
+       for($i = 1; $i<=$this->calendar->getTotalDaysInMonth(); $i++) {
+                    
+           echo '<td width="14.25%"><div class="standardW"><p class="giorno">' . $i .'</p>'; 
+                     
+           if( array_key_exists( $this->calendar->formatDate($i), $this->calendar->getEvents()) ){
+                      $e = $this->calendar->getEvents();
+               foreach($e[$this->calendar->formatDate($i)] as $k => $v) {
+                                    
+                   if('Sostituto' == $this->role) {
+                    
+                       if( (int)$v['user_id'] == (int)$this->id) {
+                            echo 'ASSENTE PER: ';
+                       } else {
+                        echo '<p class="testo-interno">Sotituisco: '. $this->utente( $v['user_id'] ) . ' Sede:  </p>' ; 
+                       }
+                   }elseif('Operatore' == $this->role) {
+                       
+                        echo 'ASSENTE PER: ';
+                       
+                   } elseif ('Amministratore' == $this->role){
+                       
+                      // echo $this->ruolo($v['user_id']);
+                      // if($this->role === $this->ruolo($v['user_id']));
+                       
+                       echo '<br>Utente: ' .  $this->utente($v['user_id'])
+                            .' => Sostituito da: ' . $this->utente($v['sostituto_id']); 
+                       
+                       
+                       
+                       
+                       
+                   }  
+                            
+                  
+               }
+                         
+           }
+           
+           echo '</div></td>';
+           if( 0 == (int) $this->calendar->_getDay($i)) {
+              // echo '<td>'.$i.'</td></tr><tr>';
+               
+               echo '</tr><tr>';
+               continue;
+           }
+           
+       }
+       
+       // numeri per completare il calendario
+       if( 0 != (int)$this->calendar->getLastDay() ) {
+           
+           $r = 7 - $this->calendar->getLastDay();
+           
+           for($i = 1; $i <= $r; $i++ ) {
+               echo '<td  style="color:#c0c0c0" width="14.25%"><div class="standardW"><p class="giorno">'.$i . '</p>';
+               
+               echo '</div></td>';
+           }
+           
+       }
+       
+       
+       echo '</tr>';
+       echo '</table>';
+?>
+
+<h3 align="center"> 
+        <a class="prev" href="<?php echo $this->baseUrl('index.php')?>/calendario/vista/anno/<?php echo $prevAnno ?>/mese/<?php echo $prevMese ?>/"><< </a> 
+            <?php echo $this->stampaMese($this->month) . ' ' . $this->year ?> 
+        <a class="next" href="<?php echo $this->baseUrl('index.php')?>/calendario/vista/anno/<?php echo $nextAnno ?>/mese/<?php echo $nextMese ?>/"> >></a> 
+</h3>

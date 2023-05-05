@@ -1,0 +1,268 @@
+<?php
+$this->headLink()->appendStylesheet($this->baseUrl().'/jquery.chromatable-1.3.0/css/style.css');
+?>
+<script>
+     
+    var sid,  importo;
+    var url = "<?php echo $this->baseUrl('index.php') ?>" ;
+ 
+    function cancellabudget(bid) {
+        $.ajax({
+           type: "POST",
+           url:  url + "/budget/delete",
+           dataType: "json",
+           data: {
+               budget_id: bid,
+               
+           },
+           beforeSend: function() {
+               $("#incorso").dialog('open');
+           },
+           success: function(response){
+               $("#incorso").dialog('close');
+               //console.log('email inviata');
+               alert(response.msg);
+               $("#bid-" + bid).remove();
+           },
+           error: function(xhr, text, thrownError) {
+       
+                $("#incorso").dialog('close');
+                console.log(xhr);
+                console.log(xhr.responseText);
+                console.log(text);
+                
+                // if(xhr.status != 500) {
+                    
+                   // alert(xhr.responseText);
+                //  }
+                $("#budget-dialog").dialog('open');
+                alert("Errore invio email: " + xhr.responseText);
+                
+                 
+           }        
+        });
+    }
+    
+    function inviabudget(sid, importo) { 
+        $.ajax({
+           type: "POST",
+           url:  url + "/budget/invia-budget",
+           dataType: "json",
+           data: {
+               sostituzione_id: sid,
+               importo: importo
+           },
+           beforeSend: function() {
+               $("#budget-dialog").dialog('close');
+               $("#incorso").dialog('open');
+           },
+           success: function(response){
+               $("#incorso").dialog('close');
+               //console.log('email inviata');
+               alert(response.msg);
+                var d = new Date();
+                var curr_date = d.getDate();
+                var curr_month = (d.getMonth() + 1) < 10 ? "0" + (d.getMonth() + 1) : (d.getMonth() + 1) ; 
+                var curr_year = d.getFullYear();
+                var _now =  curr_date + "/" + curr_month + "/" + curr_year 
+               $("#elenco-budget").append("<tr id='bid-" + response.id + "'>\n\
+                            <td>" + response.id + "</td>\n\
+                            <td>" + importo + "</td>\n\
+                            <td>" + _now + "</td>\n\
+                            <td><a  class='cancella' href='#' value='"+response.id+"'> Cancella </a></td>\n\
+                            </tr>");
+               
+               
+               
+           },
+           error: function(xhr, text, thrownError) {
+       
+                $("#incorso").dialog('close');
+                console.log(xhr);
+                console.log(xhr.responseText);
+                console.log(text);
+                
+                // if(xhr.status != 500) {
+                    
+                   // alert(xhr.responseText);
+                //  }
+                $("#budget-dialog").dialog('open');
+                alert("Errore invio email: " + xhr.responseText);
+                
+                 
+           }        
+        });
+    }
+    
+    
+    
+  $(function(){  
+  
+  $("#elenco-budget").chromatable({
+        width: "auto", 
+        height: "auto" ,
+        scrolling: "yes"
+    });
+  
+    $('.currency').blur(function() {
+      $('.currency').formatCurrency({
+          symbol: '',
+          positiveFormat: '%s%n',
+		negativeFormat: '-%s%n',
+		decimalSymbol: ',',
+		digitGroupSymbol: '.',
+		groupDigits: true
+          
+      });
+      
+    });
+ 
+  
+    
+    $('.budget').click(function(e){
+        $('.currency').val('');
+        sid = $(this).attr('href');
+        d = $("#budget-dialog");
+        d.dialog('open');
+        e.preventDefault();
+    });
+    
+    
+    $( "#budget-dialog" ).dialog({
+      autoOpen: false,  
+      resizable: false,
+      height:"200",
+      width:"300",
+      modal: true,
+      buttons: {
+        "Invia": function() {
+            _importo = $('.currency').val() ;
+           if(_importo == '') {
+               alert('Attenzione. Inserire un importo in Euro');
+           } else {
+               _importo = _importo.replace('.','') ;
+               _importo = _importo.replace(',','.') ;
+               if(!$.isNumeric(_importo)) {
+                  alert("Attenzione. Il valore contiene caratteri non numerici.")
+                  return;
+               }
+               
+               if(_importo <= 0) {
+                  alert("Attenzione. Inserire un importo maggiore di zero.")
+                  return;
+               }
+               
+               inviabudget(sid, _importo);
+           }
+        },
+        "Annulla": function() {
+          $( this ).dialog( "close" );
+          $('.currency').val('');
+        }
+      }
+    });
+        
+     
+    
+    $( "#confirm" ).dialog({
+      autoOpen: false,  
+      resizable: false,
+      height:200,
+      modal: true,
+      buttons: {
+        "Ok": function() {
+          $( this ).dialog( "close" );
+        },
+        "Cancella": function() {
+          $( this ).dialog( "close" );
+        }
+      }
+    });
+    
+    //finestra invio in corso...
+    $( "#incorso" ).dialog({
+      autoOpen: false,  
+      resizable: false,
+      height:150,
+      modal: true 
+    });
+    
+    
+    $(".cancella").live("click", function(e){
+       
+        id = $(this).attr('value') ;
+        if(confirm("Vuoi cancellare il budget numeo " +  id + "?\n Non verrà inviata nessuna email.") ){
+             cancellabudget(id);
+        }
+        e.preventDefault();
+    });
+    
+    
+    
+    
+  });
+</script>
+
+<div id="incorso" title="Invio messaggio in corso...">
+  <p> Attendere...</p>
+</div>
+
+<div id="budget-dialog" title="Inserire budget per il sostituto">
+  <p>Importo Euro: <input type="text" name="" class="currency" value="" style="height:20px; margin:0; padding:0; border-style: solid; border-color: black; border-width:1px;"/></p>
+</div>
+
+<div id="budget-dialog-view" title="Budget assegnati per il sostituto">
+  <p></p>
+</div>
+ 
+
+<div id="confirm" title="Invio email">
+  <p><span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0;"></span>Inviare email al sostituto?</p>
+</div>
+
+<h2> Assegna Budget </h2>
+<p>
+    Sostituzione n. <?php echo $this->sid ?> <br>
+    Sostituto: <?php echo $this->ao->getSostituto()->getAnagrafe(); ?><br>
+    Sede: <?php echo ucfirst( $this->ao->getLocalita() ); ?><br>
+    Tipologia: <?php echo $this->ao->getTipologia()->getDescrizione(); ?><br>
+    Dal: <?php echo $this->ao->getDateStart()->toString('dd/MMMM/yyyy'); ?><br>
+    Al: <?php echo $this->ao->getDateStop()->toString('dd/MMMM/yyyy'); ?><br>
+
+</p>
+ 
+
+
+
+<div id="view-content">
+    <a class="budget" href="<?php echo $this->sid ?>">Assegna nuova somma</a>  
+    <br><br>
+    <table id="elenco-budget">
+    <thead>
+    <tr>
+        <th>Budget id</th>
+        <th>Somme assegnate</th>
+        <th>Data assegnazione</th>
+        <th>Azioni</th>
+    </tr>
+    </thead>
+    <tbody>
+                 
+<?php
+
+if(isset($this->rows)) {
+    foreach($this->rows as $k => $row) { 
+        echo "<tr id='bid-$row->budget_id'>";
+        echo "<td>" . $row->budget_id . "</td>";
+        echo "<td>" . $row->importo . "</td>";
+        echo "<td>" . $this->formatDate($row->date, 'd/m/Y') . "</td>";
+        echo "<td><a  class='cancella' value='$row->budget_id' href='#'> Cancella </a></td>";
+        echo "</tr>";
+    }
+}
+?>
+    </tbody>
+    </table>
+             
+             
+</div>
